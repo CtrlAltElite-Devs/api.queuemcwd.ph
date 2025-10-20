@@ -14,4 +14,10 @@ export class AppController {
   getStatus(): string {
     return "Healthy";
   }
+
+  @Get("status/v2")
+  getStatusV2(): string {
+    return "Healthy v2";
+  }
+
 }
