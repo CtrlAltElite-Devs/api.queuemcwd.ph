@@ -1,3 +1,4 @@
+---
 deployment:
   tasks:
     - echo "Activating Node.js environment..."
