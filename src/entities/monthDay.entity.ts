@@ -1,8 +1,9 @@
 import { Cascade, Collection, Entity, Index, OneToMany, Property } from "@mikro-orm/core";
 import { CustomBaseEntity } from "./base.entity";
 import { Slot } from "./slot.entity";
+import { MonthDayRepository } from "src/repositories/month-day.repository";
 
-@Entity()
+@Entity({repository: () => MonthDayRepository})
 @Index({properties: ["year", "month"]})
 @Index({properties: ["year", "month", "day"]})
 export class MonthDay extends CustomBaseEntity {
