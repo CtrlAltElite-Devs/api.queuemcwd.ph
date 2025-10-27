@@ -14,13 +14,14 @@ export default defineConfig({
         ssl: false
     }
   },
-  debug: true
-//   migrations: {
-//     path: "dist/src/migrations",
-//     pathTs: "src/migrations",
-//   },
-//   seeder: {
-//     path: "dist/src/seeders",
-//     pathTs: "src/seeders"
-//   },
+  timezone: "Z",
+  debug: true,
+  migrations: {
+    path: "dist/src/migrations",
+    pathTs: "src/migrations",
+  },
+  seeder: {
+    path: "dist/src/seeders",
+    pathTs: "src/seeders"
+  },
 });

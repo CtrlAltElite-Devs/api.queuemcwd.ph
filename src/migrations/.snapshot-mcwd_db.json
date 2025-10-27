@@ -133,6 +133,26 @@
           "length": null,
           "mappedType": "integer"
         },
+        "day": {
+          "name": "day",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": null,
+          "mappedType": "integer"
+        },
+        "dayof_week": {
+          "name": "dayof_week",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "is_working_day": {
           "name": "is_working_day",
           "type": "tinyint(1)",
@@ -147,6 +167,39 @@
       },
       "name": "month_day",
       "indexes": [
+        {
+          "columnNames": [
+            "is_working_day"
+          ],
+          "composite": false,
+          "keyName": "month_day_is_working_day_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "month_day_year_month_day_index",
+          "columnNames": [
+            "year",
+            "month",
+            "day"
+          ],
+          "composite": true,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "month_day_year_month_index",
+          "columnNames": [
+            "year",
+            "month"
+          ],
+          "composite": true,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
         {
           "keyName": "PRIMARY",
           "columnNames": [
@@ -251,10 +304,31 @@
       "indexes": [
         {
           "columnNames": [
+            "is_active"
+          ],
+          "composite": false,
+          "keyName": "slot_is_active_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "month_day_id"
           ],
           "composite": false,
           "keyName": "slot_month_day_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "slot_start_time_end_time_index",
+          "columnNames": [
+            "start_time",
+            "end_time"
+          ],
+          "composite": true,
           "constraint": false,
           "primary": false,
           "unique": false
@@ -394,10 +468,41 @@
         },
         {
           "columnNames": [
+            "category_code"
+          ],
+          "composite": false,
+          "keyName": "appointment_category_code_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "queue_status"
+          ],
+          "composite": false,
+          "keyName": "appointment_queue_status_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "slot_id"
           ],
           "composite": false,
           "keyName": "appointment_slot_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "appointment_date_validity_queue_status_index",
+          "columnNames": [
+            "date_validity",
+            "queue_status"
+          ],
+          "composite": true,
           "constraint": false,
           "primary": false,
           "unique": false
