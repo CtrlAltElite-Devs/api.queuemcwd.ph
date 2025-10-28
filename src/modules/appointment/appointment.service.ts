@@ -2,7 +2,9 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 import { SlotsRepository } from "src/repositories/slots.repository";
-import { Appointment, CategoryCode, QueueStatus } from "src/entities/appointment.entity";
+import { Appointment} from "src/entities/appointment.entity";
+import { CategoryCode } from "src/enums/category-code.enum";
+import { QueueStatus } from "src/enums/queue-status.enum";
 
 @Injectable()
 export class AppointmentService {

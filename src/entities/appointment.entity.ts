@@ -2,6 +2,9 @@ import { Entity, Property, Unique, Opt, ManyToOne, Index } from "@mikro-orm/core
 import { CustomBaseEntity } from "./base.entity";
 import { Slot } from "./slot.entity";
 import { AppointmentRepository } from '../repositories/appointment.repository';
+import { CategoryCode } from '../enums/category-code.enum';
+import { QueueStatus } from '../enums/queue-status.enum';
+
 
 @Entity({repository: () => AppointmentRepository})
 @Index({ properties: ["queueStatus", "dateValidity"] })
@@ -26,19 +29,4 @@ export class Appointment extends CustomBaseEntity {
 
     @ManyToOne({ entity: () => Slot, index: true})
     slot: Slot
-}
-
-export enum CategoryCode {
-    REGULAR = "regular",
-    SENIOR = "senior",
-    PREGNANT = "pregnant",
-    PWD = "pwd"
-}
-
-export enum QueueStatus {
-    PENDING = "pending",
-    ACTIVE = "active",
-    CANCELLED = "cancelled",
-    EXPIRED = "expired",
-    DONE = "done"
 }

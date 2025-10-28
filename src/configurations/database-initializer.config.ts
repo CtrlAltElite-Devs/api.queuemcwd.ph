@@ -3,14 +3,14 @@ import { INestApplication } from "@nestjs/common";
 import { DatabaseSeeder } from "src/seeders/database.seeder";
 
 export async function InitializeDatabase(app: INestApplication<any>){
-    try{
-        await migrate(app);
-        await seed(app);
-    }catch(error){
-        console.error('❌ Database initialization failed:', error);
-        console.error(error);
-        process.exit(1);
-    }
+  try{
+    await migrate(app);
+    await seed(app);
+  }catch(error){
+    console.error('❌ Database initialization failed:', error);
+    console.error(error);
+    process.exit(1);
+  }
 }
 
 async function migrate(app: INestApplication<any>){

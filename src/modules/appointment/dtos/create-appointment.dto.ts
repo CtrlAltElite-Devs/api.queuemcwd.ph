@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum } from "class-validator";
-import { CategoryCode } from "src/entities/appointment.entity";
+import { CategoryCode } from "src/enums/category-code.enum";
 
 export class CreateAppointmentDto{
     @ApiProperty()

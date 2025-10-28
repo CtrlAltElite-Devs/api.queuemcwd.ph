@@ -1,7 +1,8 @@
 import { EntityManager } from "@mikro-orm/mysql";
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { Appointment, QueueStatus } from "src/entities/appointment.entity";
+import { Appointment } from "src/entities/appointment.entity";
+import { QueueStatus } from "src/enums/queue-status.enum";
 
 @Injectable()
 export class ActivateAppointmentsJob{
