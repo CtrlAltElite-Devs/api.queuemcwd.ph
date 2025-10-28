@@ -1,7 +1,7 @@
 import { EntityManager } from "@mikro-orm/mysql";
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { getCurrentMonthMetadata } from "./utilities/get-current-month-data";
+import { getNextMonthMetadata } from "./utilities/get-current-month-data";
 import { MonthDay } from "src/entities/monthDay.entity";
 import { createMonthDays } from "./utilities/generate-month-days";
 import moment from "moment";
@@ -22,8 +22,8 @@ export class MonthDaySeederJob {
         }
 
         this.logger.log("Seeding Month Day Table");
-        const cm = getCurrentMonthMetadata();
-        const { month, year } = cm;
+        const nm = getNextMonthMetadata();
+        const { month, year } = nm;
         const emInstance = this.em.fork();
         const exists =  await emInstance.findOne(MonthDay, {month: month, year: year});
         if(exists !== null){
@@ -32,7 +32,7 @@ export class MonthDaySeederJob {
         } else {
             try{
                 this.logger.log(`Seeding for current month: ${month} year: ${year}`);
-                const monthDays = createMonthDays(cm);
+                const monthDays = createMonthDays(nm);
                 await emInstance.persistAndFlush(monthDays);
                 this.logger.log("Month days and slots successfully seeded");
             }catch(error){

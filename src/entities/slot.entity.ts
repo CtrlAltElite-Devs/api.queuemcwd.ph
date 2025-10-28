@@ -2,7 +2,7 @@ import { Collection, Entity, Index, ManyToOne, OneToMany, Opt, Property } from "
 import { CustomBaseEntity } from "./base.entity";
 import { MonthDay } from "./monthDay.entity";
 import { Appointment } from "./appointment.entity";
-import { SlotsRepository } from "src/repositories/slots.repository";
+import { SlotsRepository } from '../repositories/slots.repository';
 
 @Entity({repository: () => SlotsRepository})
 @Index({properties: ["startTime", "endTime"]})

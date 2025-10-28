@@ -9,6 +9,4 @@ import { SlotsService } from "./slots.service";
     controllers: [SlotsController],
     providers: [SlotsService]
 })
-export class SlotModule{
-
-}
+export class SlotModule{}

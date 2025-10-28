@@ -415,23 +415,23 @@
         },
         "category_code": {
           "name": "category_code",
-          "type": "tinyint",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": null,
-          "mappedType": "enum"
+          "length": 255,
+          "mappedType": "string"
         },
         "queue_status": {
           "name": "queue_status",
-          "type": "tinyint",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": null,
-          "mappedType": "enum"
+          "length": 255,
+          "mappedType": "string"
         },
         "age": {
           "name": "age",

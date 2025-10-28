@@ -7,10 +7,10 @@ export class SlotsController{
         private readonly service: SlotsService
     ){}
 
-    @Get('/:id')
+    @Get('/:monthDayId')
     async getSlots(
-        @Param('id') id: string,
+        @Param('monthDayId') monthDayId: string,
     ){
-        return await this.service.GetSlotsForMonthDayById(id);
+        return await this.service.GetSlotsForMonthDayById(monthDayId);
     }
 }

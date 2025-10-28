@@ -23,5 +23,5 @@ export default defineConfig({
   seeder: {
     path: "dist/src/seeders",
     pathTs: "src/seeders"
-  },
+  }
 });

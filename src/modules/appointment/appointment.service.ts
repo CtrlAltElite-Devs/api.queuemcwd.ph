@@ -1,0 +1,52 @@
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { AppointmentRepository } from "src/repositories/appointment.repository";
+import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
+import { SlotsRepository } from "src/repositories/slots.repository";
+import { Appointment, CategoryCode, QueueStatus } from "src/entities/appointment.entity";
+
+@Injectable()
+export class AppointmentService {
+    constructor(
+        private readonly appointmentRepository : AppointmentRepository,
+        private readonly slotRepository: SlotsRepository
+    ) {}
+
+    async createAppointment(dto: CreateAppointmentDto){
+        if(dto.age < 18 || dto.age > 99){
+            throw new BadRequestException("age must be between 18 and 99");
+        }
+
+        if(dto.age < 60 && dto.category === CategoryCode.SENIOR){
+            throw new BadRequestException("age does not meet the requirement for senior category");
+        }
+        
+        const slot = await this.slotRepository.findOne({id: dto.slotId}, {populate: ["monthDay", "appointments"]})
+
+        if(slot === null)
+            throw new BadRequestException("slot id not found");
+
+        if(slot.isActive === false)
+            throw new BadRequestException("slot is not active");
+
+        if(slot.appointments.length >= slot.limit){
+            throw new BadRequestException("slot is already full");
+        }
+
+
+        const appointmentCode = await this.appointmentRepository.generateUniqueAppointmentCode();
+
+        const validUntilDate = new Date(
+            slot.startTime.getTime() + (8 * 60 + 30) * 60000
+        );
+
+        const newAppointment = new Appointment();
+        newAppointment.appointmentCode = appointmentCode;
+        newAppointment.age = dto.age;
+        newAppointment.categoryCode = dto.category;
+        newAppointment.dateValidity = validUntilDate;
+        newAppointment.queueStatus = QueueStatus.PENDING;
+        newAppointment.slot = slot;
+        await this.appointmentRepository.insert(newAppointment);
+        return newAppointment;
+    }
+}

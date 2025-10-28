@@ -21,6 +21,11 @@ export function createMonthDays(cm: CurrentMonthMetaData) : MonthDay[] {
             const dayofWeekString = dayMoment.format('dddd'); // "Monday"
             const dayOfWeek = DaysOfWeek[dayofWeekString.toUpperCase() as keyof typeof DaysOfWeek];
             monthDay.dayofWeek = dayOfWeek;
+            if(dayOfWeek === DaysOfWeek.SATURDAY || dayOfWeek === DaysOfWeek.SUNDAY){
+                monthDay.isWorkingDay = false;
+            } else {
+                monthDay.isWorkingDay = true;
+            }
 
             const slots: Slot[] = [];
 

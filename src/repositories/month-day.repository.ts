@@ -4,7 +4,8 @@ import { MonthDayResourceParameter } from "src/modules/month-day/resource-parame
 
 export class MonthDayRepository extends EntityRepository<MonthDay>{
     async GetMonthDayWithSlots(params: MonthDayResourceParameter){
-        const monthDayQuery = this.createQueryBuilder();
+        const monthDayQuery = this.createQueryBuilder()
+        .orderBy({year: 'ASC', month: 'ASC', day: 'ASC'});
 
         monthDayQuery.where(params.GetFilters());
 
