@@ -1,5 +1,5 @@
 import moment from "moment";
-import { MonthMetaData } from "./get-current-month-data";
+import { MonthMetaData } from "./get-current-month-data.util";
 import { DaysOfWeek, MonthDay } from "../../entities/monthDay.entity";
 import { Slot } from "../../entities/slot.entity";
 

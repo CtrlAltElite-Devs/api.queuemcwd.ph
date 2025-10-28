@@ -8,6 +8,6 @@ export class AppointmentController {
 
     @Post()    
     async createAppointment(@Body() dto: CreateAppointmentDto) {
-        return this.service.createAppointment(dto);
+        return this.service.CreateAppointmentAsync(dto);
     }
 }

@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { InitializeDatabase } from './configurations/database-initializer';
+import { InitializeDatabase } from './configurations/database-initializer.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

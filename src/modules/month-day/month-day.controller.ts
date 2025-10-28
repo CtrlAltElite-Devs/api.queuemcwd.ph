@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { MonthDayService } from "./month-day.service";
-import { MonthDayResourceParameter } from "./resource-parameters/month-day-resource-parameters";
+import { MonthDayResourceParameter } from "./resource-parameters/month-day.params";
 
 @Controller("month-day")
 export class MonthDayController {
@@ -12,6 +12,6 @@ export class MonthDayController {
     async getMonthDays(
         @Query() params: MonthDayResourceParameter
     ){
-        return await this.service.getMonthDaySlots(params);
+        return await this.service.GetMonthDaysAsync(params);
     }
 }

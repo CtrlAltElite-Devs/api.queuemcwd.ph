@@ -11,7 +11,7 @@ export class AppointmentService {
         private readonly slotRepository: SlotsRepository
     ) {}
 
-    async createAppointment(dto: CreateAppointmentDto){
+    async CreateAppointmentAsync(dto: CreateAppointmentDto){
         if(dto.age < 18 || dto.age > 99){
             throw new BadRequestException("age must be between 18 and 99");
         }
@@ -33,7 +33,7 @@ export class AppointmentService {
         }
 
 
-        const appointmentCode = await this.appointmentRepository.generateUniqueAppointmentCode();
+        const appointmentCode = await this.appointmentRepository.GenerateUniqueAppointmentCodeAsync();
 
         const validUntilDate = new Date(
             slot.startTime.getTime() + (8 * 60 + 30) * 60000

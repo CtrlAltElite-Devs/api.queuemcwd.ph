@@ -1,10 +1,9 @@
 import { EntityRepository } from "@mikro-orm/mysql";
 import { Appointment } from "src/entities/appointment.entity";
-import { generateAppointmentCode } from '../utils/generate-appointment-code';
-
+import { generateAppointmentCode } from '../utils/generate-appointment-code.util';
 
 export class AppointmentRepository extends EntityRepository<Appointment> {
-    async generateUniqueAppointmentCode(): Promise<string> {
+    async GenerateUniqueAppointmentCodeAsync(): Promise<string> {
         for (let i = 0; i < 10; i++) {
             const code = generateAppointmentCode();
 

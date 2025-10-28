@@ -1,7 +1,7 @@
 import { EntityManager } from "@mikro-orm/core";
 import { Seeder } from "@mikro-orm/seeder";
 import { Logger } from "@nestjs/common";
-import { MonthDaySeeder } from "./MonthDaySeeder";
+import { MonthDaySeeder } from "./month-day.seeder";
 
 export class DatabaseSeeder extends Seeder{
     private readonly logger = new Logger(DatabaseSeeder.name)

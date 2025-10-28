@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
-import { MonthDayResourceParameter } from "./resource-parameters/month-day-resource-parameters";
+import { MonthDayResourceParameter } from "./resource-parameters/month-day.params";
 
 @Injectable()
 export class MonthDayService {
@@ -8,7 +8,7 @@ export class MonthDayService {
         private readonly repository: MonthDayRepository
     ){}
 
-    async getMonthDaySlots(params: MonthDayResourceParameter){
-        return await this.repository.GetMonthDayWithSlots(params);
+    async GetMonthDaysAsync(params: MonthDayResourceParameter){
+        return await this.repository.GetMonthDayAsync(params);
     }
 }

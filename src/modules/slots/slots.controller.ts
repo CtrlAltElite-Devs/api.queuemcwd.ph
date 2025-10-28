@@ -11,6 +11,6 @@ export class SlotsController{
     async getSlots(
         @Param('monthDayId') monthDayId: string,
     ){
-        return await this.service.GetSlotsForMonthDayById(monthDayId);
+        return await this.service.GetSlotsForMonthDayByIdAsync(monthDayId);
     }
 }

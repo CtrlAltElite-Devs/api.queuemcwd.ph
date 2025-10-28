@@ -1,9 +1,9 @@
 import { EntityManager } from "@mikro-orm/core";
 import { Seeder } from "@mikro-orm/seeder";
-import { getCurrentMonthMetadata } from "src/cron-jobs/utilities/get-current-month-data";
+import { getCurrentMonthMetadata } from "src/cron-jobs/utilities/get-current-month-data.util";
 import { MonthDay } from '../entities/monthDay.entity';
 import { Logger } from "@nestjs/common";
-import { createMonthDays } from '../cron-jobs/utilities/generate-month-days';
+import { createMonthDays } from '../cron-jobs/utilities/generate-month-days.util';
 
 export class MonthDaySeeder extends Seeder {
     private readonly logger = new Logger(MonthDaySeeder.name);

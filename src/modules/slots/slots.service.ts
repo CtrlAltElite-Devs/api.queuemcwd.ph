@@ -10,7 +10,7 @@ export class SlotsService{
         private readonly monthDayRepository: MonthDayRepository
     ) {}
 
-    async GetSlotsForMonthDayById(monthDayId: string) : Promise<SlotDto[]>{
+    async GetSlotsForMonthDayByIdAsync(monthDayId: string) : Promise<SlotDto[]>{
         const monthDay = await this.monthDayRepository.findOne({id: monthDayId}, 
             {fields: ["id", "isWorkingDay"]}
         );
