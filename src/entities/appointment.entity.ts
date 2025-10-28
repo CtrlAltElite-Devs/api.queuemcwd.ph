@@ -4,7 +4,7 @@ import { Slot } from "./slot.entity";
 import { AppointmentRepository } from '../repositories/appointment.repository';
 
 @Entity({repository: () => AppointmentRepository})
-@Index({ properties: ["dateValidity", "queueStatus"] })
+@Index({ properties: ["queueStatus", "dateValidity"] })
 export class Appointment extends CustomBaseEntity {
     @Property()
     @Unique()
@@ -37,6 +37,8 @@ export enum CategoryCode {
 
 export enum QueueStatus {
     PENDING = "pending",
+    ACTIVE = "active",
     CANCELLED = "cancelled",
+    EXPIRED = "expired",
     DONE = "done"
 }

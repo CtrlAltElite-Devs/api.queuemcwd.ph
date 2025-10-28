@@ -1,12 +1,12 @@
 import moment from "moment";
 
-export type CurrentMonthMetaData = {
+export type MonthMetaData = {
     month: number,
     year: number,
     numberOfDays: number
 }
 
-export function getCurrentMonthMetadata() : CurrentMonthMetaData {
+export function getCurrentMonthMetadata() : MonthMetaData {
     const now = moment();
     const month = now.month() + 1;
     const year = now.year();
@@ -14,7 +14,7 @@ export function getCurrentMonthMetadata() : CurrentMonthMetaData {
     return { month, year, numberOfDays};
 }
 
-export function getNextMonthMetadata(): CurrentMonthMetaData {
+export function getNextMonthMetadata(): MonthMetaData {
     const next = moment().add(1, "month");
     const month = next.month() + 1;
     const year = next.year();

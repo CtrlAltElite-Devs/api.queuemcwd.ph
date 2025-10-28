@@ -22,8 +22,8 @@ export class MonthDaySeederJob {
         }
 
         this.logger.log("Seeding Month Day Table");
-        const nm = getNextMonthMetadata();
-        const { month, year } = nm;
+        const nextMonthMetaData = getNextMonthMetadata();
+        const { month, year } = nextMonthMetaData;
         const emInstance = this.em.fork();
         const exists =  await emInstance.findOne(MonthDay, {month: month, year: year});
         if(exists !== null){
@@ -32,7 +32,7 @@ export class MonthDaySeederJob {
         } else {
             try{
                 this.logger.log(`Seeding for current month: ${month} year: ${year}`);
-                const monthDays = createMonthDays(nm);
+                const monthDays = createMonthDays(nextMonthMetaData);
                 await emInstance.persistAndFlush(monthDays);
                 this.logger.log("Month days and slots successfully seeded");
             }catch(error){
