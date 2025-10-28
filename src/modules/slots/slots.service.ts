@@ -1,14 +1,26 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { SlotDto } from "./dtos/slot.dto";
+import { MonthDayRepository } from "src/repositories/month-day.repository";
 
 @Injectable()
 export class SlotsService{
     constructor(
-        private readonly slotRepository: SlotsRepository
+        private readonly slotRepository: SlotsRepository,
+        private readonly monthDayRepository: MonthDayRepository
     ) {}
 
     async GetSlotsForMonthDayById(monthDayId: string) : Promise<SlotDto[]>{
+        const monthDay = await this.monthDayRepository.findOne({id: monthDayId});
+
+        if(monthDay === null){
+            throw new BadRequestException("Month Day ID not found");
+        }
+
+        if(!monthDay.isWorkingDay){
+            throw new BadRequestException("Month Day is not a working day");
+        }
+
         const slots =  await this.slotRepository.findAll({
             where: {
                 monthDay: { id: monthDayId },
