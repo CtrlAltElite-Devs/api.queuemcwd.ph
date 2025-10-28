@@ -11,7 +11,9 @@ export class SlotsService{
     ) {}
 
     async GetSlotsForMonthDayById(monthDayId: string) : Promise<SlotDto[]>{
-        const monthDay = await this.monthDayRepository.findOne({id: monthDayId});
+        const monthDay = await this.monthDayRepository.findOne({id: monthDayId}, 
+            {fields: ["id", "isWorkingDay"]}
+        );
 
         if(monthDay === null){
             throw new BadRequestException("Month Day ID not found");
