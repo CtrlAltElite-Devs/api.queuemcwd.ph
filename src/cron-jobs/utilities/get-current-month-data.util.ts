@@ -21,3 +21,8 @@ export function getNextMonthMetadata(): MonthMetaData {
     const numberOfDays = new Date(year, month, 0).getDate();
     return { month, year, numberOfDays };
 }
+
+export function getMonthMetadata(month: number, year: number): MonthMetaData {
+    const numberOfDays = new Date(year, month, 0).getDate();
+    return { month, year, numberOfDays };
+}

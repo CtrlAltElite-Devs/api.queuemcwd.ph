@@ -10,6 +10,7 @@ import moment from "moment";
 export class MonthDaySeederJob {
     private readonly logger = new Logger(MonthDaySeederJob.name);
     constructor(private readonly em: EntityManager) {}
+    
     @Cron(CronExpression.EVERY_DAY_AT_1AM)
     async handleCron(){
         const now = moment();

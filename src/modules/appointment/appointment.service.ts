@@ -28,10 +28,12 @@ export class AppointmentService {
         if(slot === null)
             throw new BadRequestException("slot id not found");
 
-        if(slot.isActive === false)
+        if(!slot.isActive)
             throw new BadRequestException("slot is not active");
 
-        if(slot.appointments.length >= slot.limit){
+        const activeAppointments = slot.appointments.getItems().filter(a => a.queueStatus === QueueStatus.PENDING || a.queueStatus === QueueStatus.ACTIVE);
+
+        if(activeAppointments.length >= slot.limit){
             throw new BadRequestException("slot is already full");
         }
 
@@ -74,13 +76,62 @@ export class AppointmentService {
     }
 
     // todo add role based authorization
-    async UpdateAppointmentStatusAsync(appointmentId: string, status: QueueStatus) : Promise<AppointmentDto> {
-        const appointment = await this.appointmentRepository.findOne({id: appointmentId});
-        if(appointment === null){
-            throw new BadRequestException("appointment id not found");
+    async UpdateAppointmentStatusAsync( appointmentId: string, newStatus: QueueStatus): Promise<AppointmentDto> {
+        const appointment = await this.appointmentRepository.findOne(
+            { id: appointmentId },
+            { populate: ["slot"] }
+        );
+
+        if (!appointment) {
+            throw new BadRequestException("Appointment ID not found");
         }
 
-        appointment.queueStatus = status;
+        const now = new Date();
+
+        // Prevent updating expired appointments
+        if (appointment.dateValidity < now) {
+            throw new BadRequestException("Cannot update status of an expired appointment");
+        }
+
+        // Block updates for terminal statuses
+        const terminalStatuses = [
+            QueueStatus.CANCELLED,
+            QueueStatus.EXPIRED,
+            QueueStatus.DONE,
+        ];
+
+        if (terminalStatuses.includes(appointment.queueStatus)) {
+            throw new BadRequestException(`Cannot update status of appointment that is ${appointment.queueStatus}`);
+        }
+
+        // Validate transition rules
+        switch (newStatus) {
+            case QueueStatus.DONE:
+                if (appointment.queueStatus !== QueueStatus.ACTIVE) {
+                    throw new BadRequestException("Only active appointments can be marked as done");
+                }
+
+                if (!appointment.slot.isActive) {
+                    throw new BadRequestException("Cannot complete appointment for an inactive slot");
+                }
+
+                if (appointment.slot.startTime > now) {
+                    throw new BadRequestException("Cannot complete appointment before the slot start time");
+                }
+                break;
+
+            case QueueStatus.CANCELLED:
+                if (appointment.queueStatus === QueueStatus.DONE) {
+                    throw new BadRequestException("Cannot cancel a completed appointment");
+                }
+                break;
+
+            default:
+            // Optionally handle invalid transitions (if rules evolve later)
+            break;
+        }
+
+        appointment.queueStatus = newStatus;
         await this.appointmentRepository.getEntityManager().flush();
 
         return AppointmentDto.Map(appointment);
