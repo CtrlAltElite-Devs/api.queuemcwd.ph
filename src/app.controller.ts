@@ -8,4 +8,9 @@ export class AppController {
   getStatus(): string {
     return "Healthy";
   }
+
+  @Get("status/staging")
+  getStatusStaging(): string {
+    return "Staging Healthy";
+  }
 }

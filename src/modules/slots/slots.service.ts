@@ -31,9 +31,7 @@ export class SlotsService{
             populate: ["appointments"]
         });
 
-        const slotDtos : SlotDto[] = [];
-
-        slots.forEach((slot) => {
+        return slots.map(slot => {
             const dto = new SlotDto();
             dto.id = slot.id;
             dto.dayId = monthDayId;
@@ -42,9 +40,7 @@ export class SlotsService{
             dto.maxCapacity = slot.limit;
             dto.isActive = slot.isActive;
             dto.booked = slot.appointments.length;
-            slotDtos.push(dto);
-        })
-
-        return slotDtos;
+            return dto;
+        });
     }
 }

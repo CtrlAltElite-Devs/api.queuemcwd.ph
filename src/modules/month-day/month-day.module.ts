@@ -9,6 +9,4 @@ import { MonthDayService } from "./month-day.service";
     controllers: [MonthDayController],
     providers: [MonthDayService]
 })
-export class MonthDayModule{
-
-}
+export class MonthDayModule{}
