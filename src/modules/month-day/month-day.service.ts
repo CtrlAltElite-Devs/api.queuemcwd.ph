@@ -42,7 +42,7 @@ export class MonthDayService {
         const monthDays = createMonthDays(monthMetaData);
         
         try {
-            await this.repository.insertMany(monthDays);
+            await this.repository.getEntityManager().persistAndFlush(monthDays);
         } catch {
             throw new BadRequestException(`Failed to seed month days`);
         }

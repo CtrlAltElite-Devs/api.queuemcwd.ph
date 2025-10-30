@@ -28,6 +28,10 @@ export class AppointmentService {
         if(slot === null)
             throw new BadRequestException("slot id not found");
 
+        if(!slot.monthDay.isWorkingDay){
+            throw new BadRequestException("slot is not on a working day");
+        }
+
         if(!slot.isActive)
             throw new BadRequestException("slot is not active");
 
