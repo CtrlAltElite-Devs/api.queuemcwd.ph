@@ -18,6 +18,8 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   })
+
+  app.enableCors({origin: true, credentials: true});
   
   await app.listen(process.env.PORT ?? 5000);
 }
