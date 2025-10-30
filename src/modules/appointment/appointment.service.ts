@@ -5,6 +5,7 @@ import { SlotsRepository } from "src/repositories/slots.repository";
 import { Appointment} from "src/entities/appointment.entity";
 import { CategoryCode } from "src/enums/category-code.enum";
 import { QueueStatus } from "src/enums/queue-status.enum";
+import { AppointmentDto } from "./dtos/appointment.dto";
 
 @Injectable()
 export class AppointmentService {
@@ -13,7 +14,7 @@ export class AppointmentService {
         private readonly slotRepository: SlotsRepository
     ) {}
 
-    async CreateAppointmentAsync(dto: CreateAppointmentDto){
+    async CreateAppointmentAsync(dto: CreateAppointmentDto) : Promise<AppointmentDto> {
         if(dto.age < 18 || dto.age > 99){
             throw new BadRequestException("age must be between 18 and 99");
         }
@@ -49,6 +50,26 @@ export class AppointmentService {
         newAppointment.queueStatus = QueueStatus.PENDING;
         newAppointment.slot = slot;
         await this.appointmentRepository.insert(newAppointment);
-        return newAppointment;
+
+        return AppointmentDto.Map(newAppointment);
+    }
+
+    async VerifyAppointmentAsync(appointmentCode: string) : Promise<AppointmentDto> {
+        const appointment = await this.appointmentRepository.findOne({appointmentCode: appointmentCode}, {populate: ["slot", "slot.monthDay"]});
+        if(appointment === null){
+            throw new BadRequestException("appointment code not found");
+        }
+
+        const status = appointment.queueStatus;
+
+        if(status !== QueueStatus.ACTIVE){
+            throw new BadRequestException(`appointment is not active. current status: ${status}`);
+        }
+
+        if(appointment.dateValidity < new Date()){
+            throw new BadRequestException("appointment is already expired");
+        }
+
+        return AppointmentDto.Map(appointment);
     }
 }
