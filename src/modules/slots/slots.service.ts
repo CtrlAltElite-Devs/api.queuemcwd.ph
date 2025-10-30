@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { SlotDto } from "./dtos/slot.dto";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
+import { QueueStatus } from "src/enums/queue-status.enum";
 
 @Injectable()
 export class SlotsService{
@@ -39,7 +40,7 @@ export class SlotsService{
             dto.endTime = slot.endTime;
             dto.maxCapacity = slot.limit;
             dto.isActive = slot.isActive;
-            dto.booked = slot.appointments.length;
+            dto.booked = slot.appointments.filter(a => a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING).length;
             return dto;
         });
     }

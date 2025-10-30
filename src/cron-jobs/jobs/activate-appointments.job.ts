@@ -21,7 +21,7 @@ export class ActivateAppointmentsJob{
             })
             .where({
                 queueStatus: QueueStatus.PENDING,
-                dateValidity: { $lte: new Date() }
+                dateValidity: { $gte: new Date() } 
             })
             .execute();
     
