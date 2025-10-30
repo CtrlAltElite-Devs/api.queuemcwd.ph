@@ -55,7 +55,7 @@ export class AppointmentService {
     }
 
     async VerifyAppointmentAsync(appointmentCode: string) : Promise<AppointmentDto> {
-        const appointment = await this.appointmentRepository.findOne({appointmentCode: appointmentCode}, {populate: ["slot", "slot.monthDay"]});
+        const appointment = await this.appointmentRepository.findOne({appointmentCode: appointmentCode});
         if(appointment === null){
             throw new BadRequestException("appointment code not found");
         }
@@ -69,6 +69,19 @@ export class AppointmentService {
         if(appointment.dateValidity < new Date()){
             throw new BadRequestException("appointment is already expired");
         }
+
+        return AppointmentDto.Map(appointment);
+    }
+
+    // todo add role based authorization
+    async UpdateAppointmentStatusAsync(appointmentId: string, status: QueueStatus) : Promise<AppointmentDto> {
+        const appointment = await this.appointmentRepository.findOne({id: appointmentId});
+        if(appointment === null){
+            throw new BadRequestException("appointment id not found");
+        }
+
+        appointment.queueStatus = status;
+        await this.appointmentRepository.getEntityManager().flush();
 
         return AppointmentDto.Map(appointment);
     }
