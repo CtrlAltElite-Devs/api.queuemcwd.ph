@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { MonthDayService } from "./month-day.service";
 import { MonthDayResourceParameter } from "./resource-parameters/month-day.params";
 import { SeedMonthDayDto } from "./dtos/seed-month-day.dto";
@@ -13,7 +13,7 @@ export class MonthDayController {
     }
 
     @Post("seed")
-    async seedMonthDays(@Query() dto: SeedMonthDayDto){
+    async seedMonthDays(@Body() dto: SeedMonthDayDto){
         return await this.service.SeedMonthDayAsync(dto);
     }
 }
