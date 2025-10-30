@@ -32,6 +32,10 @@ export class AppointmentService {
             throw new BadRequestException("slot is not on a working day");
         }
 
+        if(slot.endTime < new Date()){
+            throw new BadRequestException("slot has already ended");
+        }
+
         if(!slot.isActive)
             throw new BadRequestException("slot is not active");
 
