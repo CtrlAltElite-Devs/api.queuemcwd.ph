@@ -2,11 +2,11 @@ import { defineConfig, MySqlDriver } from "@mikro-orm/mysql";
 import { entities } from "./src/entities/index.entity";
 import { Migrator } from "@mikro-orm/migrations";
 import { SeedManager } from "@mikro-orm/seeder";
-import "dotenv/config";
+import { env } from "./src/configurations/env.config";
 
 export default defineConfig({
   driver: MySqlDriver,
-  clientUrl: process.env.DATABASE_URL!,
+  clientUrl: env.DATABASE_URL,
   entities: entities,
   extensions: [Migrator, SeedManager],
   driverOptions: {
