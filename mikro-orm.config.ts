@@ -11,8 +11,8 @@ export default defineConfig({
   extensions: [Migrator, SeedManager],
   driverOptions: {
     connection: {
-        ssl: false
-    }
+      ssl: false,
+    },
   },
   timezone: "Z",
   debug: true,
@@ -22,6 +22,6 @@ export default defineConfig({
   },
   seeder: {
     path: "dist/src/seeders",
-    pathTs: "src/seeders"
-  }
+    pathTs: "src/seeders",
+  },
 });

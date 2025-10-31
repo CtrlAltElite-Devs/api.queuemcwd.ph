@@ -57,9 +57,7 @@
       "name": "admin",
       "indexes": [
         {
-          "columnNames": [
-            "username"
-          ],
+          "columnNames": ["username"],
           "composite": false,
           "keyName": "admin_username_unique",
           "constraint": true,
@@ -68,9 +66,7 @@
         },
         {
           "keyName": "PRIMARY",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -168,9 +164,7 @@
       "name": "month_day",
       "indexes": [
         {
-          "columnNames": [
-            "is_working_day"
-          ],
+          "columnNames": ["is_working_day"],
           "composite": false,
           "keyName": "month_day_is_working_day_index",
           "constraint": false,
@@ -179,11 +173,7 @@
         },
         {
           "keyName": "month_day_year_month_day_index",
-          "columnNames": [
-            "year",
-            "month",
-            "day"
-          ],
+          "columnNames": ["year", "month", "day"],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -191,10 +181,7 @@
         },
         {
           "keyName": "month_day_year_month_index",
-          "columnNames": [
-            "year",
-            "month"
-          ],
+          "columnNames": ["year", "month"],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -202,9 +189,7 @@
         },
         {
           "keyName": "PRIMARY",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -303,9 +288,7 @@
       "name": "slot",
       "indexes": [
         {
-          "columnNames": [
-            "is_active"
-          ],
+          "columnNames": ["is_active"],
           "composite": false,
           "keyName": "slot_is_active_index",
           "constraint": false,
@@ -313,9 +296,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "month_day_id"
-          ],
+          "columnNames": ["month_day_id"],
           "composite": false,
           "keyName": "slot_month_day_id_index",
           "constraint": false,
@@ -324,10 +305,7 @@
         },
         {
           "keyName": "slot_start_time_end_time_index",
-          "columnNames": [
-            "start_time",
-            "end_time"
-          ],
+          "columnNames": ["start_time", "end_time"],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -335,9 +313,7 @@
         },
         {
           "keyName": "PRIMARY",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -348,13 +324,9 @@
       "foreignKeys": {
         "slot_month_day_id_foreign": {
           "constraintName": "slot_month_day_id_foreign",
-          "columnNames": [
-            "month_day_id"
-          ],
+          "columnNames": ["month_day_id"],
           "localTableName": "slot",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "month_day",
           "updateRule": "cascade"
         }
@@ -457,9 +429,7 @@
       "name": "appointment",
       "indexes": [
         {
-          "columnNames": [
-            "appointment_code"
-          ],
+          "columnNames": ["appointment_code"],
           "composite": false,
           "keyName": "appointment_appointment_code_unique",
           "constraint": true,
@@ -467,9 +437,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "category_code"
-          ],
+          "columnNames": ["category_code"],
           "composite": false,
           "keyName": "appointment_category_code_index",
           "constraint": false,
@@ -477,9 +445,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "queue_status"
-          ],
+          "columnNames": ["queue_status"],
           "composite": false,
           "keyName": "appointment_queue_status_index",
           "constraint": false,
@@ -487,9 +453,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "slot_id"
-          ],
+          "columnNames": ["slot_id"],
           "composite": false,
           "keyName": "appointment_slot_id_index",
           "constraint": false,
@@ -498,10 +462,7 @@
         },
         {
           "keyName": "appointment_queue_status_date_validity_index",
-          "columnNames": [
-            "queue_status",
-            "date_validity"
-          ],
+          "columnNames": ["queue_status", "date_validity"],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -509,9 +470,7 @@
         },
         {
           "keyName": "PRIMARY",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -522,13 +481,9 @@
       "foreignKeys": {
         "appointment_slot_id_foreign": {
           "constraintName": "appointment_slot_id_foreign",
-          "columnNames": [
-            "slot_id"
-          ],
+          "columnNames": ["slot_id"],
           "localTableName": "appointment",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "slot",
           "updateRule": "cascade"
         }
