@@ -1,38 +1,37 @@
 import { Cascade, Collection, Entity, Index, OneToMany, Property } from "@mikro-orm/core";
 import { CustomBaseEntity } from "./base.entity";
 import { Slot } from "./slot.entity";
-import { MonthDayRepository } from '../repositories/month-day.repository';
+import { MonthDayRepository } from "../repositories/month-day.repository";
 
-
-@Entity({repository: () => MonthDayRepository})
-@Index({properties: ["year", "month"]})
-@Index({properties: ["year", "month", "day"]})
+@Entity({ repository: () => MonthDayRepository })
+@Index({ properties: ["year", "month"] })
+@Index({ properties: ["year", "month", "day"] })
 export class MonthDay extends CustomBaseEntity {
-    @Property()
-    month: number;
+  @Property()
+  month: number;
 
-    @Property()
-    year: number;
+  @Property()
+  year: number;
 
-    @Property()
-    day: number;
+  @Property()
+  day: number;
 
-    @Property()
-    dayofWeek: DaysOfWeek;
+  @Property()
+  dayofWeek: DaysOfWeek;
 
-    @Property({default: true, index: true})
-    isWorkingDay: boolean;
+  @Property({ default: true, index: true })
+  isWorkingDay: boolean;
 
-    @OneToMany(() => Slot, slot => slot.monthDay, {cascade: [Cascade.PERSIST] })
-    slots = new Collection<Slot>(this)
+  @OneToMany(() => Slot, (slot) => slot.monthDay, { cascade: [Cascade.PERSIST] })
+  slots = new Collection<Slot>(this);
 }
 
 export enum DaysOfWeek {
-    MONDAY = "monday",
-    TUESDAY = "tuesday",
-    WEDNESDAY = "wednesday",
-    THURSDAY = "thursday",
-    FRIDAY = "friday",
-    SATURDAY = "saturday",
-    SUNDAY = "sunday"
+  MONDAY = "monday",
+  TUESDAY = "tuesday",
+  WEDNESDAY = "wednesday",
+  THURSDAY = "thursday",
+  FRIDAY = "friday",
+  SATURDAY = "saturday",
+  SUNDAY = "sunday",
 }

@@ -6,8 +6,8 @@ import { AppointmentService } from "./appointment.service";
 import { Slot } from "src/entities/slot.entity";
 
 @Module({
-    imports: [MikroOrmModule.forFeature([Appointment, Slot])],
-    controllers: [AppointmentController],
-    providers: [AppointmentService]
+  imports: [MikroOrmModule.forFeature([Appointment, Slot])],
+  controllers: [AppointmentController],
+  providers: [AppointmentService],
 })
 export class AppointmentModule {}

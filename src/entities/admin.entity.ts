@@ -3,10 +3,10 @@ import { CustomBaseEntity } from "./base.entity";
 
 @Entity()
 export class Admin extends CustomBaseEntity {
-    @Property()
-    @Unique()
-    username!: string;
+  @Property()
+  @Unique()
+  username!: string;
 
-    @Property()
-    password!: string;
+  @Property()
+  password!: string;
 }

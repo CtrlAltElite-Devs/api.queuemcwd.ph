@@ -5,8 +5,8 @@ import { MonthDayController } from "./month-day.controller";
 import { MonthDayService } from "./month-day.service";
 
 @Module({
-    imports: [MikroOrmModule.forFeature([MonthDay])],
-    controllers: [MonthDayController],
-    providers: [MonthDayService]
+  imports: [MikroOrmModule.forFeature([MonthDay])],
+  controllers: [MonthDayController],
+  providers: [MonthDayService],
 })
-export class MonthDayModule{}
+export class MonthDayModule {}
