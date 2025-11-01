@@ -3,10 +3,13 @@ import { DaysOfWeek, MonthDay } from "../entities/monthDay.entity";
 import { Slot } from "../entities/slot.entity";
 import { MonthMetaData } from "./get-current-month-data.util";
 
+export type TimeRange = { startHour: number; endHour: number }; // 24-hour format
+
 export type CreateMonthDayOptions = {
     startHour?: number; // 24-hour format
     endHour?: number; // 24-hour format
     incrementMinutes?: number;
+    excludeTimes?: TimeRange[]; // e.g., [{ startHour: 11, endHour: 13 }]
 };
 
 export type GetDefaultOptionsReturnType = Required<CreateMonthDayOptions>;
@@ -14,21 +17,33 @@ export type GetDefaultOptionsReturnType = Required<CreateMonthDayOptions>;
 export function getDefaultCreateMonthDayOptions(): GetDefaultOptionsReturnType {
     return {
         startHour: 8, // 8 AM
-        endHour: 17, // 5 PM
-        incrementMinutes: 30, // 30-minute intervals
+        endHour: 15, // 3 PM
+        incrementMinutes: 60,
+        excludeTimes: [
+            { startHour: 11, endHour: 12 }, // skip 11AM-12PM
+            { startHour: 12, endHour: 13 }, // Lunch break from 12 PM to 1 PM
+        ],
     };
 }
 
 /**
- * Creates an array of MonthDay entities populated with slot entities.
- * Automatically falls back to defaults if options are not provided.
+ * Checks if a given time (moment) falls within any excluded time ranges
+ */
+function isInExcludedTime(currentTime: moment.Moment, excludeTimes: TimeRange[]): boolean {
+    const hour = currentTime.hour();
+    return excludeTimes.some((range) => hour >= range.startHour && hour < range.endHour);
+}
+
+/**
+ * Creates an array of MonthDay entities populated with slot entities,
+ * allowing dynamic options and time exclusions.
  */
 export function createMonthDays(
     monthMetadata: MonthMetaData,
     options: CreateMonthDayOptions = {},
 ): MonthDay[] {
     const { month, numberOfDays, year } = monthMetadata;
-    const { startHour, endHour, incrementMinutes } = {
+    const { startHour, endHour, incrementMinutes, excludeTimes } = {
         ...getDefaultCreateMonthDayOptions(),
         ...options,
     };
@@ -41,7 +56,7 @@ export function createMonthDays(
         monthDay.year = year;
         monthDay.day = day;
 
-        // ✅ Determine day of week
+        // Determine day of week
         const dayMoment = moment({ year, month: month - 1, day });
         const dayOfWeekString = dayMoment.format("dddd");
         const dayOfWeek = DaysOfWeek[dayOfWeekString.toUpperCase() as keyof typeof DaysOfWeek];
@@ -52,38 +67,28 @@ export function createMonthDays(
 
         const slots: Slot[] = [];
 
-        // ✅ Generate time slots efficiently
-        let currentTime = moment({
-            year,
-            month: month - 1, // moment months are 0-indexed
-            day,
-            hour: startHour,
-            minute: 0,
-        });
-
-        const endBoundary = moment({
-            year,
-            month: month - 1,
-            day,
-            hour: endHour,
-            minute: 0,
-        });
+        // Generate time slots
+        const currentTime = moment({ year, month: month - 1, day, hour: startHour, minute: 0 });
+        const endBoundary = moment({ year, month: month - 1, day, hour: endHour, minute: 0 });
 
         while (currentTime.isBefore(endBoundary) || currentTime.isSame(endBoundary)) {
-            const slot = new Slot();
-            const startTime = currentTime.clone();
-            const endTime = currentTime.clone().add(incrementMinutes, "minutes");
+            // Skip excluded times
+            if (!isInExcludedTime(currentTime, excludeTimes)) {
+                const slot = new Slot();
+                const startTime = currentTime.clone();
+                const endTime = currentTime.clone().add(incrementMinutes, "minutes");
 
-            slot.startTime = startTime.toDate();
-            slot.endTime = endTime.toDate();
-            slot.monthDay = monthDay;
+                slot.startTime = startTime.toDate();
+                slot.endTime = endTime.toDate();
+                slot.monthDay = monthDay;
 
-            // 👇 Automatically deactivate past slots
-            const now = moment();
-            slot.isActive = endTime.isAfter(now);
+                // Deactivate past slots automatically
+                const now = moment();
+                slot.isActive = endTime.isAfter(now);
 
-            slots.push(slot);
-            currentTime = endTime;
+                slots.push(slot);
+            }
+            currentTime.add(incrementMinutes, "minutes");
         }
 
         monthDay.slots.add(slots);

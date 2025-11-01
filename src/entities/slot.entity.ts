@@ -17,7 +17,7 @@ export class Slot extends CustomBaseEntity {
     isActive: boolean;
 
     @Property()
-    limit: number = 10;
+    limit: number = 1;
 
     @ManyToOne(() => MonthDay, { index: true })
     monthDay: MonthDay;
