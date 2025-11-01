@@ -2,7 +2,7 @@ import { MikroORM } from "@mikro-orm/core";
 import { INestApplication } from "@nestjs/common";
 import { DatabaseSeeder } from "src/seeders/database.seeder";
 
-export async function InitializeDatabase(app: INestApplication<any>) {
+export default async function InitializeDatabase(app: INestApplication<any>) {
   try {
     await migrate(app);
     await seed(app);

@@ -2,7 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
 
-export function UseApiDocumentations(app: INestApplication) {
+export default function UseApiDocumentations(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle("Labres API")
     .setDescription("This is the official MCWD API")
