@@ -5,15 +5,15 @@ import { SeedMonthDayDto } from "./dtos/seed-month-day.dto";
 
 @Controller("month-day")
 export class MonthDayController {
-  constructor(private readonly service: MonthDayService) {}
+    constructor(private readonly service: MonthDayService) {}
 
-  @Get()
-  async getMonthDays(@Query() params: MonthDayResourceParameter) {
-    return await this.service.GetMonthDaysAsync(params);
-  }
+    @Get()
+    async getMonthDays(@Query() params: MonthDayResourceParameter) {
+        return await this.service.GetMonthDaysAsync(params);
+    }
 
-  @Post("seed")
-  async seedMonthDays(@Body() dto: SeedMonthDayDto) {
-    return await this.service.SeedMonthDayAsync(dto);
-  }
+    @Post("seed")
+    async seedMonthDays(@Body() dto: SeedMonthDayDto) {
+        return await this.service.SeedMonthDayAsync(dto);
+    }
 }

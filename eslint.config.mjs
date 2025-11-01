@@ -5,45 +5,45 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  {
-    ignores: ["eslint.config.mjs", "dist", "node_modules", "src/migrations"],
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
-  {
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-      sourceType: "commonjs",
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+    {
+        ignores: ["eslint.config.mjs", "dist", "node_modules", "src/migrations"],
     },
-  },
-  {
-    rules: {
-      // ✅ TypeScript rules
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-floating-promises": "warn",
-      "@typescript-eslint/no-unsafe-argument": "warn",
-
-      // ✅ Prettier consistency (optional overrides)
-      "prettier/prettier": [
-        "error",
-        {
-          semi: true,
-          singleQuote: false,
-          trailingComma: "all",
-          printWidth: 100,
-          tabWidth: 2,
-          bracketSpacing: true,
-          endOfLine: "lf",
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+    eslintPluginPrettierRecommended,
+    {
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                ...globals.jest,
+            },
+            sourceType: "commonjs",
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
-      ],
     },
-  },
+    {
+        rules: {
+            // ✅ TypeScript rules
+            "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/no-floating-promises": "warn",
+            "@typescript-eslint/no-unsafe-argument": "warn",
+
+            // ✅ Prettier consistency (optional overrides)
+            "prettier/prettier": [
+                "error",
+                {
+                    semi: true,
+                    singleQuote: false,
+                    trailingComma: "all",
+                    printWidth: 100,
+                    tabWidth: 4,
+                    bracketSpacing: true,
+                    endOfLine: "lf",
+                },
+            ],
+        },
+    },
 );
