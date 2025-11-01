@@ -1,14 +1,17 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { SlotsRepository } from "src/repositories/slots.repository";
-import { SlotDto } from "./dtos/slot.dto";
-import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { QueueStatus } from "src/enums/queue-status.enum";
+import { MonthDayRepository } from "src/repositories/month-day.repository";
+import { SlotsRepository } from "src/repositories/slots.repository";
+import { UnitOfWork } from "../common/unit-of-work";
+import { SlotDto } from "./dtos/slot.dto";
+import { UpdateSlotDto } from "./dtos/update-slot.dto";
 
 @Injectable()
 export class SlotsService {
     constructor(
         private readonly slotRepository: SlotsRepository,
         private readonly monthDayRepository: MonthDayRepository,
+        private readonly unitOfWork: UnitOfWork,
     ) {}
 
     async GetSlotsForMonthDayByIdAsync(monthDayId: string): Promise<SlotDto[]> {
@@ -47,5 +50,13 @@ export class SlotsService {
             ).length;
             return dto;
         });
+    }
+
+    async UpdateSlotAsync(slotId: string, dto: UpdateSlotDto) {
+        const slot = await this.slotRepository.findOne({ id: slotId });
+        if (slot === null) throw new BadRequestException("Slot id not found");
+        slot.Update(dto);
+        await this.unitOfWork.Commit();
+        return SlotDto.Map(slot);
     }
 }

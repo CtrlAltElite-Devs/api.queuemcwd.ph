@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Branch } from "src/entities/branch.entity";
 import { DaysOfWeek, MonthDay } from "../entities/monthDay.entity";
 import { Slot } from "../entities/slot.entity";
 import { MonthMetaData } from "./get-current-month-data.util";
@@ -39,6 +40,7 @@ function isInExcludedTime(currentTime: moment.Moment, excludeTimes: TimeRange[])
  * allowing dynamic options and time exclusions.
  */
 export function createMonthDays(
+    branch: Branch,
     monthMetadata: MonthMetaData,
     options: CreateMonthDayOptions = {},
 ): MonthDay[] {
@@ -55,6 +57,7 @@ export function createMonthDays(
         monthDay.month = month;
         monthDay.year = year;
         monthDay.day = day;
+        monthDay.branch = branch;
 
         // Determine day of week
         const dayMoment = moment({ year, month: month - 1, day });
@@ -81,6 +84,7 @@ export function createMonthDays(
                 slot.startTime = startTime.toDate();
                 slot.endTime = endTime.toDate();
                 slot.monthDay = monthDay;
+                slot.branch = branch;
 
                 // Deactivate past slots automatically
                 const now = moment();

@@ -5,7 +5,7 @@ import UseApiVersioning from "./configurations/api-versioning.config";
 import ApplyConfigurations, { usePostBootstrap } from "./configurations/bootstrap.config";
 import ApplyCorsConfigurations from "./configurations/cors.config";
 import InitializeDatabase from "./configurations/database-initializer.config";
-import { resolvePort } from "./configurations/env.config";
+import { resolvePort } from "./configurations/env/env.config";
 import UseApiDocumentations from "./configurations/open-api.config";
 
 async function bootstrap() {
