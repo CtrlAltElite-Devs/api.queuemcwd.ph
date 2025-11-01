@@ -17,5 +17,5 @@ export class UpdateAppointmentDto {
         example: QueueStatus.ACTIVE,
     })
     @IsIn(allowedStatusesForUpdate)
-    status: QueueStatus;
+    queueStatus: QueueStatus;
 }

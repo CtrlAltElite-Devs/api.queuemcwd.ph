@@ -2,6 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Appointment } from "src/entities/appointment.entity";
 import { CategoryCode } from "src/enums/category-code.enum";
 import { QueueStatus } from "src/enums/queue-status.enum";
+import { BranchDto } from "src/modules/branch/dto/branch.dto";
+import { SlotDto } from "src/modules/slots/dtos/slot.dto";
 
 export class AppointmentDto {
     @ApiProperty()
@@ -23,7 +25,10 @@ export class AppointmentDto {
     queueStatus: QueueStatus;
 
     @ApiProperty()
-    slotId: string;
+    slot: SlotDto;
+
+    @ApiProperty()
+    branch: BranchDto;
 
     static Map(appointment: Appointment): AppointmentDto {
         const dto = new AppointmentDto();
@@ -33,7 +38,8 @@ export class AppointmentDto {
         dto.categoryCode = appointment.categoryCode;
         dto.dateValidity = appointment.dateValidity;
         dto.queueStatus = appointment.queueStatus;
-        dto.slotId = appointment.slot.id;
+        dto.slot = SlotDto.Map(appointment.slot);
+        dto.branch = BranchDto.Map(appointment.branch);
         return dto;
     }
 }

@@ -26,7 +26,7 @@ export class AppointmentService {
 
         const slot = await this.slotRepository.findOne(
             { id: dto.slotId },
-            { populate: ["monthDay", "appointments"] },
+            { populate: ["monthDay", "appointments", "branch"] },
         );
 
         if (slot === null) throw new BadRequestException("slot id not found");
@@ -74,6 +74,7 @@ export class AppointmentService {
         newAppointment.dateValidity = slot.endTime;
         newAppointment.queueStatus = QueueStatus.PENDING;
         newAppointment.slot = slot;
+        newAppointment.branch = slot.branch;
 
         await this.appointmentRepository.insert(newAppointment);
 
@@ -81,9 +82,12 @@ export class AppointmentService {
     }
 
     async VerifyAppointmentAsync(appointmentCode: string): Promise<AppointmentDto> {
-        const appointment = await this.appointmentRepository.findOne({
-            appointmentCode: appointmentCode,
-        });
+        const appointment = await this.appointmentRepository.findOne(
+            {
+                appointmentCode: appointmentCode,
+            },
+            { populate: ["slot", "branch"] },
+        );
         if (appointment === null) {
             throw new BadRequestException("appointment code not found");
         }
