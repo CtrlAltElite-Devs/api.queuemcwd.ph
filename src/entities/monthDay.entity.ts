@@ -1,7 +1,8 @@
 import { Cascade, Collection, Entity, Index, OneToMany, Property } from "@mikro-orm/core";
+import moment from "moment";
+import { MonthDayRepository } from "../repositories/month-day.repository";
 import { CustomBaseEntity } from "./base.entity";
 import { Slot } from "./slot.entity";
-import { MonthDayRepository } from "../repositories/month-day.repository";
 
 @Entity({ repository: () => MonthDayRepository })
 @Index({ properties: ["year", "month"] })
@@ -24,6 +25,10 @@ export class MonthDay extends CustomBaseEntity {
 
   @OneToMany(() => Slot, (slot) => slot.monthDay, { cascade: [Cascade.PERSIST] })
   slots = new Collection<Slot>(this);
+
+  ConvertToMoment() {
+    return moment({ year: this.year, month: this.month - 1, day: this.day });
+  }
 }
 
 export enum DaysOfWeek {

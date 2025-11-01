@@ -1,8 +1,8 @@
 import { Collection, Entity, Index, ManyToOne, OneToMany, Opt, Property } from "@mikro-orm/core";
+import { SlotsRepository } from "../repositories/slots.repository";
+import { Appointment } from "./appointment.entity";
 import { CustomBaseEntity } from "./base.entity";
 import { MonthDay } from "./monthDay.entity";
-import { Appointment } from "./appointment.entity";
-import { SlotsRepository } from "../repositories/slots.repository";
 
 @Entity({ repository: () => SlotsRepository })
 @Index({ properties: ["startTime", "endTime"] })

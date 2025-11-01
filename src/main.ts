@@ -1,3 +1,4 @@
+import { ConsoleLogger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import UseApiVersioning from "./configurations/api-versioning.config";
@@ -8,7 +9,11 @@ import { resolvePort } from "./configurations/env.config";
 import UseApiDocumentations from "./configurations/open-api.config";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: new ConsoleLogger({
+      prefix: "MCWD",
+    }),
+  });
 
   await InitializeDatabase(app);
   ApplyConfigurations(app);

@@ -1,7 +1,7 @@
 import moment from "moment";
+import { DaysOfWeek, MonthDay } from "../entities/monthDay.entity";
+import { Slot } from "../entities/slot.entity";
 import { MonthMetaData } from "./get-current-month-data.util";
-import { DaysOfWeek, MonthDay } from "../../entities/monthDay.entity";
-import { Slot } from "../../entities/slot.entity";
 
 export type CreateMonthDayOptions = {
   startHour?: number; // 24-hour format
@@ -75,6 +75,10 @@ export function createMonthDays(
       slot.startTime = startTime.toDate();
       slot.endTime = endTime.toDate();
       slot.monthDay = monthDay;
+
+      // 👇 Automatically deactivate past slots
+      const now = moment();
+      slot.isActive = endTime.isAfter(now);
 
       slots.push(slot);
       currentTime = endTime;

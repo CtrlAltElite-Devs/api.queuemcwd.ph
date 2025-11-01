@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { AppointmentRepository } from "src/repositories/appointment.repository";
-import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
-import { SlotsRepository } from "src/repositories/slots.repository";
+import moment from "moment";
 import { Appointment } from "src/entities/appointment.entity";
 import { CategoryCode } from "src/enums/category-code.enum";
 import { QueueStatus } from "src/enums/queue-status.enum";
+import { AppointmentRepository } from "src/repositories/appointment.repository";
+import { SlotsRepository } from "src/repositories/slots.repository";
 import { AppointmentDto } from "./dtos/appointment.dto";
+import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 
 @Injectable()
 export class AppointmentService {
@@ -34,11 +35,23 @@ export class AppointmentService {
       throw new BadRequestException("slot is not on a working day");
     }
 
-    if (slot.endTime < new Date()) {
+    if (moment(slot.endTime).isBefore(moment(), "minute")) {
       throw new BadRequestException("slot has already ended");
     }
 
     if (!slot.isActive) throw new BadRequestException("slot is not active");
+
+    const now = moment();
+    const today = now.clone().startOf("day");
+    const slotDate = slot.monthDay.ConvertToMoment();
+
+    if (slotDate.isSame(today, "day")) {
+      throw new BadRequestException("you cannot create an appointment for today");
+    }
+
+    if (slotDate.isBefore(today, "day")) {
+      throw new BadRequestException("slot date has already passed");
+    }
 
     const activeAppointments = slot.appointments
       .getItems()
@@ -50,15 +63,14 @@ export class AppointmentService {
 
     const appointmentCode = await this.appointmentRepository.GenerateUniqueAppointmentCodeAsync();
 
-    const validUntilDate = new Date(slot.startTime.getTime() + (8 * 60 + 30) * 60000);
-
     const newAppointment = new Appointment();
     newAppointment.appointmentCode = appointmentCode;
     newAppointment.age = dto.age;
     newAppointment.categoryCode = dto.category;
-    newAppointment.dateValidity = validUntilDate;
+    newAppointment.dateValidity = slot.endTime;
     newAppointment.queueStatus = QueueStatus.PENDING;
     newAppointment.slot = slot;
+
     await this.appointmentRepository.insert(newAppointment);
 
     return AppointmentDto.Map(newAppointment);
