@@ -1,5 +1,5 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
-import { env } from "./env.config";
+import { env, resolvePort } from "./env.config";
 
 export default function ApplyConfigurations(app: INestApplication<any>) {
   app.setGlobalPrefix("api");
@@ -8,8 +8,9 @@ export default function ApplyConfigurations(app: INestApplication<any>) {
 
 function exposeApiDocumentationInLogs() {
   if (env.NODE_ENV !== "development") return;
-  console.log(`📚 Swagger API docs available at: http://localhost:${env.PORT ?? 5009}/swagger`);
-  console.log(`🔖 Scalar API docs available at: http://localhost:${env.PORT ?? 5009}/docs`);
+  const port = resolvePort();
+  console.log(`📚 Swagger API docs available at: http://localhost:${port}/swagger`);
+  console.log(`🔖 Scalar API docs available at: http://localhost:${port}/docs`);
 }
 
 export const usePostBootstrap = () => {

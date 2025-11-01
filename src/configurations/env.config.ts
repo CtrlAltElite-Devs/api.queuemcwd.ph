@@ -1,5 +1,5 @@
-import z from "zod";
 import "dotenv/config";
+import z from "zod";
 
 export const envSchema = z.object({
   DATABASE_URL: z.url(),
@@ -9,3 +9,4 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 export const env = envSchema.parse(process.env);
+export const resolvePort = () => env.PORT || 5009;
