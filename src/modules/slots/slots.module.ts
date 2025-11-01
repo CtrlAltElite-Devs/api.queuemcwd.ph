@@ -6,8 +6,8 @@ import { SlotsService } from "./slots.service";
 import { MonthDay } from "src/entities/monthDay.entity";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Slot, MonthDay])],
-  controllers: [SlotsController],
-  providers: [SlotsService],
+    imports: [MikroOrmModule.forFeature([Slot, MonthDay])],
+    controllers: [SlotsController],
+    providers: [SlotsService],
 })
 export class SlotModule {}

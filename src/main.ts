@@ -9,21 +9,21 @@ import { resolvePort } from "./configurations/env.config";
 import UseApiDocumentations from "./configurations/open-api.config";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: new ConsoleLogger({
-      prefix: "MCWD",
-    }),
-  });
+    const app = await NestFactory.create(AppModule, {
+        logger: new ConsoleLogger({
+            prefix: "MCWD",
+        }),
+    });
 
-  await InitializeDatabase(app);
-  ApplyConfigurations(app);
-  UseApiVersioning(app);
+    await InitializeDatabase(app);
+    ApplyConfigurations(app);
+    UseApiVersioning(app);
 
-  UseApiDocumentations(app);
-  ApplyCorsConfigurations(app);
-  const port = resolvePort();
-  await app.listen(port);
-  console.log(`✅ Server running on port ${port}`);
+    UseApiDocumentations(app);
+    ApplyCorsConfigurations(app);
+    const port = resolvePort();
+    await app.listen(port);
+    console.log(`✅ Server running on port ${port}`);
 }
 
 bootstrap().then(usePostBootstrap).catch(console.error);

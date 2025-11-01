@@ -11,18 +11,18 @@ import { ConfigModule } from "@nestjs/config";
 import { validateEnv } from "./configurations/env.validation";
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate: validateEnv,
-    }),
-    ScheduleModule.forRoot(),
-    MikroOrmModule.forRootAsync({ useFactory: () => config }),
-    SlotModule,
-    MonthDayModule,
-    AppointmentModule,
-  ],
-  controllers: [AppController],
-  providers: [...cronJobs],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            validate: validateEnv,
+        }),
+        ScheduleModule.forRoot(),
+        MikroOrmModule.forRootAsync({ useFactory: () => config }),
+        SlotModule,
+        MonthDayModule,
+        AppointmentModule,
+    ],
+    controllers: [AppController],
+    providers: [...cronJobs],
 })
 export class AppModule {}

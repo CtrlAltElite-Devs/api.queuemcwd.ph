@@ -8,35 +8,35 @@ import { Slot } from "./slot.entity";
 @Index({ properties: ["year", "month"] })
 @Index({ properties: ["year", "month", "day"] })
 export class MonthDay extends CustomBaseEntity {
-  @Property()
-  month: number;
+    @Property()
+    month: number;
 
-  @Property()
-  year: number;
+    @Property()
+    year: number;
 
-  @Property()
-  day: number;
+    @Property()
+    day: number;
 
-  @Property()
-  dayofWeek: DaysOfWeek;
+    @Property()
+    dayofWeek: DaysOfWeek;
 
-  @Property({ default: true, index: true })
-  isWorkingDay: boolean;
+    @Property({ default: true, index: true })
+    isWorkingDay: boolean;
 
-  @OneToMany(() => Slot, (slot) => slot.monthDay, { cascade: [Cascade.PERSIST] })
-  slots = new Collection<Slot>(this);
+    @OneToMany(() => Slot, (slot) => slot.monthDay, { cascade: [Cascade.PERSIST] })
+    slots = new Collection<Slot>(this);
 
-  ConvertToMoment() {
-    return moment({ year: this.year, month: this.month - 1, day: this.day });
-  }
+    ConvertToMoment() {
+        return moment({ year: this.year, month: this.month - 1, day: this.day });
+    }
 }
 
 export enum DaysOfWeek {
-  MONDAY = "monday",
-  TUESDAY = "tuesday",
-  WEDNESDAY = "wednesday",
-  THURSDAY = "thursday",
-  FRIDAY = "friday",
-  SATURDAY = "saturday",
-  SUNDAY = "sunday",
+    MONDAY = "monday",
+    TUESDAY = "tuesday",
+    WEDNESDAY = "wednesday",
+    THURSDAY = "thursday",
+    FRIDAY = "friday",
+    SATURDAY = "saturday",
+    SUNDAY = "sunday",
 }

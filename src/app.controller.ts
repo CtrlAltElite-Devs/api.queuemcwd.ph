@@ -2,15 +2,15 @@ import { Controller, Get } from "@nestjs/common";
 
 @Controller()
 export class AppController {
-  constructor() {}
+    constructor() {}
 
-  @Get("status")
-  getStatus(): string {
-    return "Healthy";
-  }
+    @Get("status")
+    getStatus(): string {
+        return "Healthy";
+    }
 
-  @Get("status/staging")
-  getStatusStaging(): string {
-    return "Staging Healthy";
-  }
+    @Get("status/staging")
+    getStatusStaging(): string {
+        return "Staging Healthy";
+    }
 }

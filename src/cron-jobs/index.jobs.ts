@@ -4,8 +4,8 @@ import { ExpireAppointmentsJob } from "./jobs/appointment-jobs/expire-appointmen
 import { MonthDaySeederJob } from "./jobs/seeder-jobs/month-day-seeder-job";
 
 export const cronJobs = [
-  MonthDaySeederJob,
-  ActivateAppointmentsJob,
-  ExpireAppointmentsJob,
-  DeactivateSlotJob,
+    MonthDaySeederJob,
+    ActivateAppointmentsJob,
+    ExpireAppointmentsJob,
+    DeactivateSlotJob,
 ];
