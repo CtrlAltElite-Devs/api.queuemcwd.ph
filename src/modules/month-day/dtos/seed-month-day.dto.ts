@@ -1,14 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsPositive, IsUUID, Max, Min } from "class-validator";
+import { IsInt, IsPositive, Max, Min } from "class-validator";
 
 export class SeedMonthDayDto {
-    @ApiProperty({
-        description: "The unique ID of the branch to seed month days for",
-        example: "f4f6a8b2-8b99-4e7b-b84b-5a19e66e02b2",
-    })
-    @IsUUID("all", { message: "branchId must be a valid UUID." })
-    branchId: string;
-
     @ApiProperty({
         description: "Month number (1–12)",
         example: 10,
