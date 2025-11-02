@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsOptional, IsStrongPassword } from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsStrongPassword, IsUUID } from "class-validator";
 import { AdminRole } from "src/entities/admin.entity";
 
 export class CreateAdminDto {
@@ -11,4 +11,8 @@ export class CreateAdminDto {
 
     @IsEnum(AdminRole)
     role: AdminRole;
+
+    @IsOptional()
+    @IsUUID()
+    branchId?: string;
 }

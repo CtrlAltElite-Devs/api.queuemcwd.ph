@@ -4,6 +4,7 @@ import { Appointment } from "src/entities/appointment.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { UnitOfWork } from "../common/unit-of-work";
 import { AppointmentDto } from "./dtos/appointment.dto";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 
@@ -12,6 +13,7 @@ export class AppointmentService {
     constructor(
         private readonly appointmentRepository: AppointmentRepository,
         private readonly slotRepository: SlotsRepository,
+        private readonly unitOfWork: UnitOfWork,
     ) {}
 
     async CreateAppointmentAsync(dto: CreateAppointmentDto): Promise<AppointmentDto> {
@@ -59,8 +61,8 @@ export class AppointmentService {
             await this.appointmentRepository.GenerateUniqueAppointmentCodeAsync();
 
         const newAppointment = Appointment.Create(appointmentCode, slot, dto);
-        await this.appointmentRepository.insert(newAppointment);
-
+        this.appointmentRepository.create(newAppointment);
+        await this.unitOfWork.Commit();
         return AppointmentDto.Map(newAppointment);
     }
 

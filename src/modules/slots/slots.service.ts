@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
@@ -52,9 +53,12 @@ export class SlotsService {
         });
     }
 
-    async UpdateSlotAsync(slotId: string, dto: UpdateSlotDto) {
-        const slot = await this.slotRepository.findOne({ id: slotId });
+    async UpdateSlotAsync(admin: AdminDto, slotId: string, dto: UpdateSlotDto) {
+        const slot = await this.slotRepository.findOne({ id: slotId }, { populate: ["branch"] });
         if (slot === null) throw new BadRequestException("Slot id not found");
+        if (admin.branchId !== slot?.branch.id) {
+            throw new UnauthorizedException("admin is not assigned to the slot's branch");
+        }
         slot.Update(dto);
         await this.unitOfWork.Commit();
         return SlotDto.Map(slot);
