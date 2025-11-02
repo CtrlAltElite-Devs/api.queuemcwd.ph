@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    ParseUUIDPipe,
+    Patch,
+    Post,
+    Query,
+    Req,
+} from "@nestjs/common";
+import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
+import { UseAdminOnlyGuard } from "src/security/decorators/index.decorators";
 import { SeedMonthDayDto } from "./dtos/seed-month-day.dto";
 import { UpdateMonthDayDto } from "./dtos/update-month-day.dto";
 import { MonthDayService } from "./month-day.service";
@@ -14,8 +26,9 @@ export class MonthDayController {
     }
 
     @Post("seed")
-    async seedMonthDays(@Body() dto: SeedMonthDayDto) {
-        return await this.service.SeedMonthDayAsync(dto);
+    @UseAdminOnlyGuard()
+    async seedMonthDays(@Req() request: AuthenticatedRequest, @Body() dto: SeedMonthDayDto) {
+        return await this.service.SeedMonthDayAsync(request.admin!, dto);
     }
 
     @Patch("/:monthDayId")

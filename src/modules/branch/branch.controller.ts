@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post } from "@nestjs/common";
+import { UseAdminOnlyGuard } from "src/security/decorators/index.decorators";
 import { BranchService } from "./branch.service";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 
@@ -12,6 +13,7 @@ export class BranchController {
     }
 
     @Post()
+    @UseAdminOnlyGuard()
     async CreateBranchAsync(@Body() dto: CreateBranchDto) {
         return await this.branchService.CreateBranchAsync(dto);
     }

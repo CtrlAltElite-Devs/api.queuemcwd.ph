@@ -1,12 +1,23 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
+import { ACCESS_TOKEN } from "./constants.config";
 
 export default function UseApiDocumentations(app: INestApplication) {
     const config = new DocumentBuilder()
         .setTitle("Labres API")
         .setDescription("This is the official MCWD API")
         .setVersion("1.0")
+        .addBearerAuth(
+            {
+                type: "http",
+                scheme: "bearer",
+                bearerFormat: "JWT",
+                name: "Authorization",
+                in: "header",
+            },
+            ACCESS_TOKEN,
+        )
         .build();
 
     const documentFactory = () => SwaggerModule.createDocument(app, config);

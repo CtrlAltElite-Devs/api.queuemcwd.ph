@@ -1,10 +1,15 @@
 import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { env } from "src/configurations/env/env.config";
 import { Admin } from "src/entities/admin.entity";
+import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
+import { BranchRepository } from "src/repositories/branch.repository";
+import { CustomJwtService } from "../common/custom-jwt-service";
+import { JwtPayloadDto } from "../common/dto/jwt-payload.dto";
+import { UnitOfWork } from "../common/unit-of-work";
 import { AdminLoginResponseDto } from "./dto/admin-login-response.dto";
+import { AdminDto } from "./dto/admin.dto";
 import { CreateAdminDto } from "./dto/create-admin.dto";
 import { AdminLoginDto } from "./dto/login-admin.dto";
 
@@ -12,14 +17,26 @@ import { AdminLoginDto } from "./dto/login-admin.dto";
 export class AdminService {
     constructor(
         private readonly adminRepository: AdminRepository,
-        private readonly jwtService: JwtService,
+        private readonly branchRepository: BranchRepository,
+        private readonly jwtService: CustomJwtService,
+        private readonly unitOfWork: UnitOfWork,
     ) {}
 
-    async CreateAdminAsync(dto: CreateAdminDto) {
+    async CreateAdminAsync(dto: CreateAdminDto): Promise<AdminDto> {
         const exists = await this.adminRepository.findOne({ email: dto.email });
 
         if (exists !== null) {
             throw new BadRequestException("email already exists");
+        }
+
+        let branch: Branch | undefined = undefined;
+
+        if (dto.branchId !== undefined) {
+            const existingBranch = await this.branchRepository.findOne({ id: dto.branchId });
+            if (existingBranch === null) {
+                throw new BadRequestException("branch Id does not exist");
+            }
+            branch = existingBranch;
         }
 
         const saltRounds = await bcrypt.genSalt();
@@ -37,10 +54,12 @@ export class AdminService {
         newAdmin.email = dto.email;
         newAdmin.password = hashedPassword;
         newAdmin.role = dto.role;
+        newAdmin.branch = branch;
 
-        await this.adminRepository.insert(newAdmin);
+        this.adminRepository.create(newAdmin);
+        await this.unitOfWork.Commit();
 
-        return newAdmin;
+        return AdminDto.Map(newAdmin);
     }
 
     async AdminLoginAsync(body: AdminLoginDto): Promise<AdminLoginResponseDto> {
@@ -56,9 +75,37 @@ export class AdminService {
             throw new UnauthorizedException("Invalid Credentials");
         }
 
-        const payload = { sub: admin.id, role: admin.role };
-        const dto = new AdminLoginResponseDto();
-        dto.accessToken = await this.jwtService.signAsync(payload);
-        return dto;
+        const signedTokens = await this.jwtService.CreateSignedTokens(
+            JwtPayloadDto.Create(admin.id),
+        );
+        return {
+            accessToken: signedTokens.accessToken,
+        };
+    }
+
+    async GetAdminByIdForGuard(adminId: string) {
+        const admin = await this.adminRepository.findOne(
+            {
+                id: adminId,
+            },
+            { populate: ["branch"] },
+        );
+
+        if (admin === null) return null;
+
+        return AdminDto.Map(admin);
+    }
+
+    async Me(adminId: string) {
+        const admin = await this.adminRepository.findOne(
+            {
+                id: adminId,
+            },
+            { populate: ["branch"] },
+        );
+
+        if (admin !== null) throw new UnauthorizedException("admin not found");
+
+        return admin;
     }
 }

@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { BranchRepository } from "src/repositories/branch.repository";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { createMonthDays } from "src/utils/generate-month-days.util";
 import { getMonthMetadata } from "src/utils/get-current-month-data.util";
+import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
 import { MonthDayDto } from "./dtos/month-day.dto";
 import { SeedMonthDayDto } from "./dtos/seed-month-day.dto";
@@ -33,7 +34,7 @@ export class MonthDayService {
         });
     }
 
-    async SeedMonthDayAsync(dto: SeedMonthDayDto) {
+    async SeedMonthDayAsync(admin: AdminDto, dto: SeedMonthDayDto) {
         if (dto.month < 1 || dto.month > 12) {
             throw new BadRequestException("Invalid month: must be between 1 and 12");
         }
@@ -44,6 +45,10 @@ export class MonthDayService {
         const branch = await this.branchRepository.findOne({ id: dto.branchId });
         if (!branch) {
             throw new BadRequestException("Branch not found");
+        }
+
+        if (admin.branchId !== branch.id) {
+            throw new UnauthorizedException("admin is not assigned to this branch");
         }
 
         const monthMetaData = getMonthMetadata(dto.month, dto.year);

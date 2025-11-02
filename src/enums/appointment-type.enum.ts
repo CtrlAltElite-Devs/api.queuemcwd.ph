@@ -1,0 +1,6 @@
+export enum AppointmentType {
+    BILLING_CONCERN,
+    WATER_SUPPLIER_ISSUES,
+    LEAK_REPORTS,
+    SERVICE_CONNECTION_CONCERNS,
+}

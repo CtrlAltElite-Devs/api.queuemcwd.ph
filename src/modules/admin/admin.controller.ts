@@ -1,4 +1,9 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req } from "@nestjs/common";
+import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
+import {
+    UseAuthenticationGuard,
+    UseSuperAdminOnlyGuard,
+} from "src/security/decorators/index.decorators";
 import { AdminService } from "./admin.service";
 import { CreateAdminDto } from "./dto/create-admin.dto";
 import { AdminLoginDto } from "./dto/login-admin.dto";
@@ -8,6 +13,7 @@ export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
     @Post()
+    @UseSuperAdminOnlyGuard()
     async CreateAdminAsync(@Body() body: CreateAdminDto) {
         return await this.adminService.CreateAdminAsync(body);
     }
@@ -15,5 +21,11 @@ export class AdminController {
     @Post("login")
     async AdminLoginAsync(@Body() body: AdminLoginDto) {
         return await this.adminService.AdminLoginAsync(body);
+    }
+
+    @Get("me")
+    @UseAuthenticationGuard()
+    Me(@Req() request: AuthenticatedRequest) {
+        return request.admin;
     }
 }

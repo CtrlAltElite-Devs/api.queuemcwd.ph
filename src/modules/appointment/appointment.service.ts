@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import moment from "moment";
 import { Appointment } from "src/entities/appointment.entity";
-import { CategoryCode } from "src/enums/category-code.enum";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { UnitOfWork } from "../common/unit-of-work";
 import { AppointmentDto } from "./dtos/appointment.dto";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 
@@ -13,17 +13,10 @@ export class AppointmentService {
     constructor(
         private readonly appointmentRepository: AppointmentRepository,
         private readonly slotRepository: SlotsRepository,
+        private readonly unitOfWork: UnitOfWork,
     ) {}
 
     async CreateAppointmentAsync(dto: CreateAppointmentDto): Promise<AppointmentDto> {
-        if (dto.age < 18 || dto.age > 99) {
-            throw new BadRequestException("age must be between 18 and 99");
-        }
-
-        if (dto.age < 60 && dto.category === CategoryCode.SENIOR) {
-            throw new BadRequestException("age does not meet the requirement for senior category");
-        }
-
         const slot = await this.slotRepository.findOne(
             { id: dto.slotId },
             { populate: ["monthDay", "appointments", "branch"] },
@@ -67,17 +60,9 @@ export class AppointmentService {
         const appointmentCode =
             await this.appointmentRepository.GenerateUniqueAppointmentCodeAsync();
 
-        const newAppointment = new Appointment();
-        newAppointment.appointmentCode = appointmentCode;
-        newAppointment.age = dto.age;
-        newAppointment.categoryCode = dto.category;
-        newAppointment.dateValidity = slot.endTime;
-        newAppointment.queueStatus = QueueStatus.PENDING;
-        newAppointment.slot = slot;
-        newAppointment.branch = slot.branch;
-
-        await this.appointmentRepository.insert(newAppointment);
-
+        const newAppointment = Appointment.Create(appointmentCode, slot, dto);
+        this.appointmentRepository.create(newAppointment);
+        await this.unitOfWork.Commit();
         return AppointmentDto.Map(newAppointment);
     }
 
