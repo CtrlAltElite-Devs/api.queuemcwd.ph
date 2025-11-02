@@ -1,33 +1,55 @@
 import { EntityManager } from "@mikro-orm/mysql";
-import { Injectable, Logger } from "@nestjs/common";
-import { Cron, CronExpression } from "@nestjs/schedule";
+import { Injectable } from "@nestjs/common";
+import { Cron, CronExpression, SchedulerRegistry } from "@nestjs/schedule";
+import { BaseJob } from "src/cron-jobs/base.job";
+import { JobRecordType } from "src/cron-jobs/startup-job-registry";
 import { Slot } from "src/entities/slot.entity";
 
 @Injectable()
-export class DeactivateSlotJob {
-    private readonly logger = new Logger(DeactivateSlotJob.name);
+export class DeactivateSlotJob extends BaseJob {
+    constructor(
+        private readonly em: EntityManager,
+        schedulerRegistry: SchedulerRegistry,
+    ) {
+        super(schedulerRegistry, DeactivateSlotJob.name);
+    }
 
-    constructor(private readonly em: EntityManager) {}
-
-    @Cron(CronExpression.EVERY_5_MINUTES)
+    @Cron(CronExpression.EVERY_5_MINUTES, { name: DeactivateSlotJob.name })
     async handle() {
+        this.logger.log("Running scheduled slot deactivation...");
+        await this.deactivatePastSlots();
+    }
+
+    protected async runStartupTask(): Promise<JobRecordType> {
+        this.logger.log("Running startup slot deactivation check...");
+        return this.deactivatePastSlots();
+    }
+
+    private async deactivatePastSlots(): Promise<JobRecordType> {
         try {
-            this.logger.log("Deactivating past slots...");
             const emInstance = this.em.fork();
             const result = await emInstance
                 .createQueryBuilder(Slot)
-                .update({
-                    isActive: false,
-                })
+                .update({ isActive: false })
                 .where({
                     endTime: { $lt: new Date() },
                     isActive: true,
                 })
                 .execute();
 
-            this.logger.log(`Deactivated ${result.affectedRows} slots.`);
-        } catch (error) {
-            this.logger.error("Error deactivating slots:", error);
+            const count = result.affectedRows ?? 0;
+
+            if (count === 0) {
+                this.logger.log("No past slots found to deactivate.");
+                return { status: "skipped", details: "No expired active slots." };
+            }
+
+            this.logger.log(`Deactivated ${count} slots.`);
+            return { status: "executed", details: `Deactivated ${count} slots.` };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.error("Error deactivating slots:", message);
+            return { status: "failed", details: message };
         }
     }
 }
