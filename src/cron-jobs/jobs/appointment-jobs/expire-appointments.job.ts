@@ -22,7 +22,6 @@ export class ExpireAppointmentsJob extends BaseJob {
     }
 
     protected async runStartupTask(): Promise<JobRecordType> {
-        this.logger.log("Running startup expiry check...");
         return await this.expireOldAppointments();
     }
 

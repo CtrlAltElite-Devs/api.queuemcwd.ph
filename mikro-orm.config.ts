@@ -15,7 +15,7 @@ export default defineConfig({
         },
     },
     timezone: "Z",
-    debug: true,
+    debug: env.NODE_ENV === "development",
     migrations: {
         path: "dist/src/migrations",
         pathTs: "src/migrations",

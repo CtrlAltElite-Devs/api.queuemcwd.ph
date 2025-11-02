@@ -20,12 +20,10 @@ export class MonthDaySeederJob extends BaseJob {
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { name: MonthDaySeederJob.name })
     async handleCron() {
-        this.logger.log("Running daily MonthDay seeder check...");
         await this.seedNextMonthIfNeeded();
     }
 
     protected async runStartupTask(): Promise<JobRecordType> {
-        this.logger.log("Running startup MonthDay seeder check...");
         return await this.seedNextMonthIfNeeded();
     }
 

@@ -21,7 +21,6 @@ export class DeactivateSlotJob extends BaseJob {
     }
 
     protected async runStartupTask(): Promise<JobRecordType> {
-        this.logger.log("Running startup slot deactivation check...");
         return this.deactivatePastSlots();
     }
 
