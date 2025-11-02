@@ -555,6 +555,36 @@
                     "length": 255,
                     "mappedType": "string"
                 },
+                "account_code": {
+                    "name": "account_code",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": false,
+                    "length": 255,
+                    "mappedType": "string"
+                },
+                "contact_person": {
+                    "name": "contact_person",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": false,
+                    "length": 255,
+                    "mappedType": "string"
+                },
+                "contact": {
+                    "name": "contact",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": false,
+                    "length": 255,
+                    "mappedType": "string"
+                },
                 "date_validity": {
                     "name": "date_validity",
                     "type": "datetime",
@@ -585,15 +615,15 @@
                     "length": 255,
                     "mappedType": "string"
                 },
-                "age": {
-                    "name": "age",
-                    "type": "int",
+                "appointment_type": {
+                    "name": "appointment_type",
+                    "type": "varchar(255)",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "length": null,
-                    "mappedType": "integer"
+                    "length": 255,
+                    "mappedType": "string"
                 },
                 "slot_id": {
                     "name": "slot_id",
@@ -638,6 +668,14 @@
                     "columnNames": ["queue_status"],
                     "composite": false,
                     "keyName": "appointment_queue_status_index",
+                    "constraint": false,
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["appointment_type"],
+                    "composite": false,
+                    "keyName": "appointment_appointment_type_index",
                     "constraint": false,
                     "primary": false,
                     "unique": false
