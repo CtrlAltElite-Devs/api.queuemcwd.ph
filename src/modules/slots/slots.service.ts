@@ -21,7 +21,7 @@ export class SlotsService {
     async GetSlotByIdAsync(slotId: string) {
         const slot = await this.slotRepository.findOne(
             { id: slotId },
-            { populate: ["appointments", "monthDay"] },
+            { populate: ["appointments", "monthDay", "branch"] },
         );
         if (slot === null) throw new NotFoundException("slot not found");
 
