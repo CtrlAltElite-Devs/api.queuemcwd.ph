@@ -1,4 +1,5 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { StartupJobRegistry } from "src/cron-jobs/startup-job-registry";
 import { env, resolvePort } from "./env/env.config";
 
 export default function ApplyConfigurations(app: INestApplication<any>) {
@@ -8,7 +9,7 @@ export default function ApplyConfigurations(app: INestApplication<any>) {
             whitelist: true,
             forbidNonWhitelisted: true,
             transform: true,
-            transformOptions: { enableImplicitConversion: true }, // 👈 converts "11" -> 11 automatically
+            transformOptions: { enableImplicitConversion: true },
         }),
     );
 }
@@ -20,6 +21,11 @@ function exposeApiDocumentationInLogs() {
     console.log(`🔖 Scalar API docs available at: http://localhost:${port}/docs`);
 }
 
+function showStartupJobRegistrySummary() {
+    StartupJobRegistry.printSummary();
+}
+
 export const usePostBootstrap = () => {
+    showStartupJobRegistrySummary();
     exposeApiDocumentationInLogs();
 };
