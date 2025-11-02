@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsUUID } from "class-validator";
+import { IsEnum, IsString, IsUUID } from "class-validator";
 import { AppointmentType } from "src/enums/appointment-type.enum";
 import { CategoryCode } from "src/enums/category-code.enum";
 
@@ -9,12 +9,15 @@ export class CreateAppointmentDto {
     slotId: string;
 
     @ApiProperty()
+    @IsString()
     accountCode: string;
 
     @ApiProperty()
+    @IsString()
     contactPerson: string;
 
     @ApiProperty()
+    @IsString()
     contact: string;
 
     @ApiProperty()

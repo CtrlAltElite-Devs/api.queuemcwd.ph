@@ -3,15 +3,14 @@ import { MonthDay } from "src/entities/monthDay.entity";
 import { MonthDayResourceParameter } from "src/modules/month-day/resource-parameters/month-day.params";
 
 export class MonthDayRepository extends EntityRepository<MonthDay> {
-    async GetMonthDayAsync(params: MonthDayResourceParameter) {
-        const monthDayQuery = this.createQueryBuilder().orderBy({
+    async GetMonthDayForBranchAsync(branchId: string, params: MonthDayResourceParameter) {
+        const monthDayQuery = this.createQueryBuilder().where({ branch: { id: branchId } });
+
+        monthDayQuery.andWhere(params.GetFilters()).orderBy({
             year: "ASC",
             month: "ASC",
             day: "ASC",
         });
-
-        monthDayQuery.where(params.GetFilters());
-
         return await monthDayQuery.getResult();
     }
 }

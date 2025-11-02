@@ -8,9 +8,9 @@ import { SlotsService } from "./slots.service";
 export class SlotsController {
     constructor(private readonly service: SlotsService) {}
 
-    @Get("/:monthDayId")
-    async getSlots(@Param("monthDayId", new ParseUUIDPipe()) monthDayId: string) {
-        return await this.service.GetSlotsForMonthDayByIdAsync(monthDayId);
+    @Get("/:slotId")
+    async GetSlot(@Param("slotId", new ParseUUIDPipe()) slotId: string) {
+        return await this.service.GetSlotByIdAsync(slotId);
     }
 
     @Patch("/:slotId")
