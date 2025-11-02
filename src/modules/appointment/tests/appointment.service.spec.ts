@@ -5,6 +5,7 @@ import { Appointment } from "src/entities/appointment.entity";
 import { MonthDay } from "src/entities/monthDay.entity";
 import { Slot } from "src/entities/slot.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
+import { UnitOfWork } from "src/modules/common/unit-of-work";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { AppointmentService } from "../appointment.service";
@@ -32,6 +33,9 @@ describe("AppointmentService", () => {
             providers: [AppointmentService],
         })
             .useMocker((token) => {
+                if (token === UnitOfWork) {
+                    return { Commit: jest.fn() };
+                }
                 if (token === AppointmentRepository) {
                     return { findOne: jest.fn(), save: jest.fn() };
                 }
