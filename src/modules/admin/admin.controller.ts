@@ -12,7 +12,7 @@ import { AdminLoginDto } from "./dto/login-admin.dto";
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
-    @Post()
+    @Post("register")
     @UseSuperAdminOnlyGuard()
     async CreateAdminAsync(@Body() body: CreateAdminDto) {
         return await this.adminService.CreateAdminAsync(body);

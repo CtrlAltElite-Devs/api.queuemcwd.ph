@@ -3,6 +3,7 @@ import { BranchRepository } from "../repositories/branch.repository";
 import { Admin } from "./admin.entity";
 import { CustomBaseEntity } from "./base.entity";
 import { MonthDay } from "./monthDay.entity";
+import { UpdateBranchDto } from "../modules/branch/dto/update-branch.dto";
 
 @Entity({ repository: () => BranchRepository })
 export class Branch extends CustomBaseEntity {
@@ -21,4 +22,14 @@ export class Branch extends CustomBaseEntity {
 
     @OneToMany(() => MonthDay, (md) => md.branch, { cascade: [Cascade.PERSIST] })
     monthDays = new Collection<MonthDay>(this);
+
+    Update(dto: UpdateBranchDto) {
+        if (dto.name) {
+            this.name = dto.name;
+        }
+
+        if (dto.address) {
+            this.address = dto.address;
+        }
+    }
 }

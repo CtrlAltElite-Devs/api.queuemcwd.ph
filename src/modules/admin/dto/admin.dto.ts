@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Admin } from "src/entities/admin.entity";
+import { Admin, AdminRole } from "src/entities/admin.entity";
 
 export class AdminDto {
     @ApiProperty()
@@ -9,7 +9,7 @@ export class AdminDto {
     email: string;
 
     @ApiProperty()
-    role: string;
+    role: AdminRole;
 
     @ApiProperty()
     branchId?: string;

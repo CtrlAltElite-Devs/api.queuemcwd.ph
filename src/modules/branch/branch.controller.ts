@@ -1,10 +1,21 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    ParseUUIDPipe,
+    Post,
+    Query,
+    Req,
+    Patch,
+} from "@nestjs/common";
 import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
 import { UseAdminOnlyGuard } from "src/security/decorators/index.decorators";
 import { SeedMonthDayDto } from "../month-day/dtos/seed-month-day.dto";
 import { MonthDayResourceParameter } from "../month-day/resource-parameters/month-day.params";
 import { BranchService } from "./branch.service";
 import { CreateBranchDto } from "./dto/create-branch.dto";
+import { UpdateBranchDto } from "./dto/update-branch.dto";
 
 @Controller("branch")
 export class BranchController {
@@ -45,5 +56,15 @@ export class BranchController {
     @UseAdminOnlyGuard()
     async CreateBranchAsync(@Body() dto: CreateBranchDto) {
         return await this.branchService.CreateBranchAsync(dto);
+    }
+
+    @Patch("/:branchId")
+    @UseAdminOnlyGuard()
+    async UpdateBranch(
+        @Req() request: AuthenticatedRequest,
+        @Param("branchId", new ParseUUIDPipe()) branchId: string,
+        @Body() body: UpdateBranchDto,
+    ) {
+        return await this.branchService.UpdateBranchAsync(request.admin!, branchId, body);
     }
 }

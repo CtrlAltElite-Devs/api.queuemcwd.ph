@@ -1,5 +1,11 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from "@nestjs/common";
 import { Branch } from "src/entities/branch.entity";
+import { AdminRole } from "src/entities/admin.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
@@ -15,6 +21,7 @@ import { MonthDayResourceParameter } from "../month-day/resource-parameters/mont
 import { SlotDto } from "../slots/dtos/slot.dto";
 import { BranchDto } from "./dto/branch.dto";
 import { CreateBranchDto } from "./dto/create-branch.dto";
+import { UpdateBranchDto } from "./dto/update-branch.dto";
 
 @Injectable()
 export class BranchService {
@@ -159,5 +166,23 @@ export class BranchService {
             seededMonthDays: monthDays.length,
             seededSlots: monthDays.reduce((acc, md) => acc + md.slots.getItems().length, 0),
         };
+    }
+
+    async UpdateBranchAsync(admin: AdminDto, branchId: string, dto: UpdateBranchDto) {
+        const branch = await this.branchRepository.findOne(
+            {
+                id: branchId,
+            },
+            { populate: ["admins"] },
+        );
+        if (branch === null) throw new NotFoundException("Branch not found");
+        if (admin.role !== AdminRole.SUPER_ADMIN) {
+            if (admin.branchId !== branch.id) {
+                throw new UnauthorizedException("Admin is not assigned to this branch");
+            }
+        }
+        branch.Update(dto);
+        await this.unitOfWork.Commit();
+        return branch;
     }
 }

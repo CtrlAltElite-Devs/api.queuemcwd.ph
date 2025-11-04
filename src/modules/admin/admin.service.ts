@@ -84,6 +84,7 @@ export class AdminService {
     }
 
     async GetAdminByIdForGuard(adminId: string) {
+        // todo add caching mechanism
         const admin = await this.adminRepository.findOne(
             {
                 id: adminId,
