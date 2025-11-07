@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional, Min } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, Matches, Min } from "class-validator";
 
 export class UpdateSlotDto {
     @IsOptional()
@@ -9,4 +9,12 @@ export class UpdateSlotDto {
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;
+
+    @IsOptional()
+    @Matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/, { message: "startTime must be in HH:mm format" })
+    startTime?: string;
+
+    @IsOptional()
+    @Matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/, { message: "endTime must be in HH:mm format" })
+    endTime?: string;
 }

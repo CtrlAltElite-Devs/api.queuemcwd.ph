@@ -33,7 +33,10 @@ export class MonthDay extends CustomBaseEntity {
     @Property({ default: true, index: true })
     isWorkingDay: boolean;
 
-    @OneToMany(() => Slot, (slot) => slot.monthDay, { cascade: [Cascade.PERSIST] })
+    @OneToMany(() => Slot, (slot) => slot.monthDay, {
+        cascade: [Cascade.PERSIST],
+        orphanRemoval: true,
+    })
     slots = new Collection<Slot>(this);
 
     @ManyToOne(() => Branch)

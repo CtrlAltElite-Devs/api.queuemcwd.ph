@@ -1,4 +1,5 @@
 import { Collection, Entity, Index, ManyToOne, OneToMany, Opt, Property } from "@mikro-orm/core";
+import { QueueStatus } from "src/enums/queue-status.enum";
 import { UpdateSlotDto } from "src/modules/slots/dtos/update-slot.dto";
 import { SlotsRepository } from "../repositories/slots.repository";
 import { Appointment } from "./appointment.entity";
@@ -42,5 +43,11 @@ export class Slot extends CustomBaseEntity {
         if (dto.limit !== undefined) {
             this.limit = dto.limit;
         }
+    }
+
+    ComputeBooked() {
+        return this.appointments.filter(
+            (a) => a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING,
+        ).length;
     }
 }

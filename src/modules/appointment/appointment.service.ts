@@ -1,12 +1,13 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import moment from "moment";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Appointment } from "src/entities/appointment.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
 import { AppointmentDto } from "./dtos/appointment.dto";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
+import { AppointmentValidator } from "./validators/appointment.validator";
 
 @Injectable()
 export class AppointmentService {
@@ -22,45 +23,12 @@ export class AppointmentService {
             { populate: ["monthDay", "appointments", "branch"] },
         );
 
-        if (slot === null) throw new BadRequestException("slot id not found");
-
-        if (!slot.monthDay.isWorkingDay) {
-            throw new BadRequestException("slot is not on a working day");
-        }
-
-        if (moment(slot.endTime).isBefore(moment(), "minute")) {
-            throw new BadRequestException("slot has already ended");
-        }
-
-        if (!slot.isActive) throw new BadRequestException("slot is not active");
-
-        const now = moment();
-        const today = now.clone().startOf("day");
-        const slotDate = slot.monthDay.ConvertToMoment();
-
-        if (slotDate.isSame(today, "day")) {
-            throw new BadRequestException("you cannot create an appointment for today");
-        }
-
-        if (slotDate.isBefore(today, "day")) {
-            throw new BadRequestException("slot date has already passed");
-        }
-
-        const activeAppointments = slot.appointments
-            .getItems()
-            .filter(
-                (a) =>
-                    a.queueStatus === QueueStatus.PENDING || a.queueStatus === QueueStatus.ACTIVE,
-            );
-
-        if (activeAppointments.length >= slot.limit) {
-            throw new BadRequestException("slot is already full");
-        }
+        AppointmentValidator.validateSlot(slot);
 
         const appointmentCode =
             await this.appointmentRepository.GenerateUniqueAppointmentCodeAsync();
 
-        const newAppointment = Appointment.Create(appointmentCode, slot, dto);
+        const newAppointment = Appointment.Create(appointmentCode, slot!, dto);
         this.appointmentRepository.create(newAppointment);
         await this.unitOfWork.Commit();
         return AppointmentDto.Map(newAppointment);
@@ -80,18 +48,22 @@ export class AppointmentService {
         return AppointmentDto.Map(appointment);
     }
 
-    // todo add role based authorization
     async UpdateAppointmentStatusAsync(
+        admin: AdminDto,
         appointmentId: string,
         newStatus: QueueStatus,
     ): Promise<AppointmentDto> {
         const appointment = await this.appointmentRepository.findOne(
             { id: appointmentId },
-            { populate: ["slot"] },
+            { populate: ["slot", "branch"] },
         );
 
         if (appointment === null) {
             throw new BadRequestException("Appointment ID not found");
+        }
+
+        if (appointment.branch.id !== admin.branchId) {
+            throw new UnauthorizedException("admin cannot update appointment from another branch");
         }
 
         const now = new Date();

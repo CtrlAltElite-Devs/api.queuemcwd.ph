@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { env } from "src/configurations/env/env.config";
+import { AdminCacheTTL, AdminKey } from "src/constants/cache.constants";
 import { Admin } from "src/entities/admin.entity";
 import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
+import { CacheService } from "../common/cache-service";
 import { CustomJwtService } from "../common/custom-jwt-service";
 import { JwtPayloadDto } from "../common/dto/jwt-payload.dto";
 import { UnitOfWork } from "../common/unit-of-work";
@@ -20,6 +22,7 @@ export class AdminService {
         private readonly branchRepository: BranchRepository,
         private readonly jwtService: CustomJwtService,
         private readonly unitOfWork: UnitOfWork,
+        private readonly cacheService: CacheService,
     ) {}
 
     async CreateAdminAsync(dto: CreateAdminDto): Promise<AdminDto> {
@@ -84,7 +87,13 @@ export class AdminService {
     }
 
     async GetAdminByIdForGuard(adminId: string) {
-        // todo add caching mechanism
+        return await this.cacheService.GetOrCreateWithLock(AdminKey(adminId), {
+            getFunc: () => this.RetrieveAdminDto(adminId),
+            ttl: AdminCacheTTL,
+        });
+    }
+
+    private async RetrieveAdminDto(adminId: string): Promise<AdminDto | null> {
         const admin = await this.adminRepository.findOne(
             {
                 id: adminId,

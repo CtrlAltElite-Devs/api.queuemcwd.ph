@@ -106,3 +106,46 @@ export function createMonthDays(
 
     return monthDays;
 }
+
+/**
+ * Generates slot entities for a specific MonthDay.
+ * Attaches each slot to the given MonthDay and its branch automatically.
+ */
+export function generateSlotsForMonthDay(
+    monthDay: MonthDay,
+    options: CreateMonthDayOptions = {},
+): Slot[] {
+    const { startHour, endHour, incrementMinutes, excludeTimes } = {
+        ...getDefaultCreateMonthDayOptions(),
+        ...options,
+    };
+
+    const { year, month, day, branch } = monthDay;
+    const slots: Slot[] = [];
+
+    const currentTime = moment({ year, month: month - 1, day, hour: startHour, minute: 0 });
+    const endBoundary = moment({ year, month: month - 1, day, hour: endHour, minute: 0 });
+
+    while (currentTime.isBefore(endBoundary) || currentTime.isSame(endBoundary)) {
+        if (!isInExcludedTime(currentTime, excludeTimes)) {
+            const slot = new Slot();
+            const startTime = currentTime.clone();
+            const endTime = currentTime.clone().add(incrementMinutes, "minutes");
+
+            slot.startTime = startTime.toDate();
+            slot.endTime = endTime.toDate();
+            slot.monthDay = monthDay;
+            slot.branch = branch;
+            slot.isActive = endTime.isAfter(moment()); // automatically deactivate past slots
+
+            slots.push(slot);
+        }
+
+        currentTime.add(incrementMinutes, "minutes");
+    }
+
+    // If you’re using MikroORM’s Collection
+    monthDay.slots.add(slots);
+
+    return slots;
+}
