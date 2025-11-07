@@ -33,6 +33,16 @@
                     "length": null,
                     "mappedType": "datetime"
                 },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 255,
+                    "mappedType": "string"
+                },
                 "name": {
                     "name": "name",
                     "type": "varchar(255)",
@@ -118,6 +128,16 @@
                     "nullable": false,
                     "length": null,
                     "mappedType": "datetime"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 255,
+                    "mappedType": "string"
                 },
                 "email": {
                     "name": "email",
@@ -232,6 +252,16 @@
                     "nullable": false,
                     "length": null,
                     "mappedType": "datetime"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 255,
+                    "mappedType": "string"
                 },
                 "month": {
                     "name": "month",
@@ -385,6 +415,16 @@
                     "nullable": false,
                     "length": null,
                     "mappedType": "datetime"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 255,
+                    "mappedType": "string"
                 },
                 "start_time": {
                     "name": "start_time",
@@ -544,6 +584,16 @@
                     "nullable": false,
                     "length": null,
                     "mappedType": "datetime"
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "varchar(255)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 255,
+                    "mappedType": "string"
                 },
                 "appointment_code": {
                     "name": "appointment_code",

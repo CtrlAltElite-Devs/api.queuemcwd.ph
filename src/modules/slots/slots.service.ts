@@ -6,16 +6,21 @@ import {
 } from "@nestjs/common";
 import moment from "moment";
 import { QueueStatus } from "src/enums/queue-status.enum";
+import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { Slot } from "../../entities/slot.entity";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
+import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
+import { SlotValidator } from "./validators/slot.validator";
 
 @Injectable()
 export class SlotsService {
     constructor(
         private readonly slotRepository: SlotsRepository,
+        private readonly monthDayRepository: MonthDayRepository,
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
@@ -47,71 +52,29 @@ export class SlotsService {
             throw new UnauthorizedException("Admin is not assigned to the slot's branch");
         }
 
-        if (dto.limit && dto.limit <= 0) {
-            throw new BadRequestException("limit should be atleaset 1");
-        }
+        SlotValidator.ValidateLimit(dto.limit);
 
         const neighborSlots = await this.slotRepository.find({
             monthDay: { id: slot.monthDay.id },
         });
 
-        // ✅ Validate start/end times (if provided)
         if (dto.startTime && dto.endTime) {
-            const start = moment(dto.startTime, "HH:mm");
-            const end = moment(dto.endTime, "HH:mm");
+            SlotValidator.ValidateTimeFormatAndOrder(dto.startTime, dto.endTime);
+            SlotValidator.ValidateNoOverlap({
+                startTime: dto.startTime,
+                endTime: dto.endTime,
+                neighborSlots: neighborSlots,
+                currentSlotId: slotId,
+            });
 
-            if (!start.isValid() || !end.isValid()) {
-                throw new BadRequestException("Invalid time format (must be HH:mm)");
-            }
-
-            if (!start.isBefore(end)) {
-                throw new BadRequestException("startTime must be earlier than endTime");
-            }
-
-            const diffMinutes = end.diff(start, "minutes");
-            if (diffMinutes < 15) {
-                throw new BadRequestException("Slot duration must be at least 15 minutes");
-            }
-
-            // ✅ Collision detection
-            for (const neighbor of neighborSlots) {
-                if (neighbor.id === slot.id) continue;
-
-                const nStart = moment(neighbor.startTime, "HH:mm");
-                const nEnd = moment(neighbor.endTime, "HH:mm");
-
-                const overlaps = start.isBefore(nEnd) && end.isAfter(nStart);
-
-                if (overlaps) {
-                    throw new BadRequestException(
-                        `Time range ${dto.startTime}–${dto.endTime} overlaps with another slot (${neighbor.startTime.toLocaleTimeString()} –> ${neighbor.endTime.toLocaleTimeString()})`,
-                    );
-                }
-            }
-
-            // ✅ Convert HH:mm string into Date (keeping the same day as slot.monthDay)
             const baseDate = slot.monthDay.ConvertToMoment();
             if (!baseDate.isValid()) {
                 throw new BadRequestException("Invalid monthDay date for slot");
             }
 
-            slot.startTime = moment(dto.startTime, "HH:mm")
-                .set({
-                    year: baseDate.year(),
-                    month: baseDate.month(),
-                    date: baseDate.date(),
-                })
-                .toDate();
-
-            slot.endTime = moment(dto.endTime, "HH:mm")
-                .set({
-                    year: baseDate.year(),
-                    month: baseDate.month(),
-                    date: baseDate.date(),
-                })
-                .toDate();
+            slot.startTime = this.ConvertToFullDate(baseDate, dto.startTime);
+            slot.endTime = this.ConvertToFullDate(baseDate, dto.endTime);
         } else if (dto.startTime || dto.endTime) {
-            // Handle case where only one of them is provided
             throw new BadRequestException(
                 "Both startTime and endTime are required to change slot time",
             );
@@ -122,5 +85,80 @@ export class SlotsService {
 
         await this.unitOfWork.Commit();
         return SlotDto.Map(slot);
+    }
+
+    async CreateSlot(admin: AdminDto, dto: CreateSlotDto) {
+        const monthDay = await this.monthDayRepository.findOne(
+            {
+                id: dto.monthDayId,
+            },
+            { populate: ["slots", "branch"] },
+        );
+
+        if (monthDay === null) throw new NotFoundException("Month day not found");
+
+        if (monthDay.branch.id !== admin.branchId) {
+            throw new UnauthorizedException("Admin is not assigned to this branch");
+        }
+
+        SlotValidator.ValidateLimit(dto.limit);
+
+        const slots = monthDay.slots;
+
+        SlotValidator.ValidateTimeFormatAndOrder(dto.startTime, dto.endTime);
+        SlotValidator.ValidateNoOverlap({
+            startTime: dto.startTime,
+            endTime: dto.endTime,
+            neighborSlots: [...slots],
+            currentSlotId: "",
+        });
+
+        const baseDate = monthDay.ConvertToMoment();
+        if (!baseDate.isValid()) {
+            throw new BadRequestException("Invalid monthDay date for slot");
+        }
+
+        const validatedStartTime = this.ConvertToFullDate(baseDate, dto.startTime);
+        const validatedEndTime = this.ConvertToFullDate(baseDate, dto.endTime);
+
+        const newSlot = Slot.Create(dto, validatedStartTime, validatedEndTime);
+        newSlot.monthDay = monthDay;
+        newSlot.branch = monthDay.branch;
+        this.slotRepository.create(newSlot);
+        await this.unitOfWork.Commit();
+
+        return SlotDto.Map(newSlot);
+    }
+
+    async DeleteSlot(admin: AdminDto, slotId: string) {
+        const slot = await this.slotRepository.findOne(
+            {
+                id: slotId,
+            },
+            { populate: ["branch"] },
+        );
+
+        if (slot === null) throw new NotFoundException("Slot not found");
+
+        if (slot.branch.id !== admin.branchId)
+            throw new UnauthorizedException("Admin is not under this branch");
+
+        slot.SoftDelete();
+
+        await this.unitOfWork.Commit();
+
+        return {
+            message: `Slot: ${slot.id} was deleted`,
+        };
+    }
+
+    private ConvertToFullDate(baseDate: moment.Moment, time: string): Date {
+        return moment(time, "HH:mm")
+            .set({
+                year: baseDate.year(),
+                month: baseDate.month(),
+                date: baseDate.date(),
+            })
+            .toDate();
     }
 }

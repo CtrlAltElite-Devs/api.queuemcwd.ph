@@ -1,0 +1,41 @@
+# Node dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist
+build
+coverage
+
+# Environment files
+.env
+.env.*
+!.env.sample   # keep sample env for documentation
+
+# Git & CI
+.git
+.gitignore
+.github/
+.husky/
+
+# Docker-related files (don’t send them in the build context)
+docker-compose.yml
+docker-compose-*.yml
+docker-stack.yml
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Test and docs
+test/
+__tests__/
+*.spec.ts
+docs/
