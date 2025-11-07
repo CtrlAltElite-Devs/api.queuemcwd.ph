@@ -4,9 +4,8 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from "@nestjs/common";
-import { Branch } from "src/entities/branch.entity";
 import { AdminRole } from "src/entities/admin.entity";
-import { QueueStatus } from "src/enums/queue-status.enum";
+import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
@@ -108,10 +107,7 @@ export class BranchService {
         return slots.map((slot) => {
             const dto = SlotDto.Map(slot);
             dto.dayId = monthDayId;
-            dto.booked = slot.appointments.filter(
-                (a) =>
-                    a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING,
-            ).length;
+            dto.booked = slot.ComputeBooked();
             return dto;
         });
     }
