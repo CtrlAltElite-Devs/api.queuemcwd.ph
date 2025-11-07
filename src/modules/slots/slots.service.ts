@@ -18,12 +18,14 @@ export class SlotsService {
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
-    async GetSlotByIdAsync(slotId: string) {
+    async GetSlotByIdAsync(admin: AdminDto, slotId: string) {
         const slot = await this.slotRepository.findOne(
             { id: slotId },
             { populate: ["appointments", "monthDay", "branch"] },
         );
         if (slot === null) throw new NotFoundException("slot not found");
+        if (slot.branch.id !== admin.branchId)
+            throw new UnauthorizedException("this admin is not assigned to the slot's branch");
 
         const dto = SlotDto.Map(slot);
         dto.booked = slot.appointments.filter(

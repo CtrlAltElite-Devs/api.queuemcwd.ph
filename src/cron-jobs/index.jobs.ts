@@ -3,7 +3,7 @@ import { DeactivateSlotJob } from "./jobs/appointment-jobs/deactivate-slot-job";
 import { ExpireAppointmentsJob } from "./jobs/appointment-jobs/expire-appointments.job";
 import { MonthDaySeederJob } from "./jobs/seeder-jobs/month-day-seeder-job";
 
-export const cronJobs = [
+export const AllCronJobs = [
     MonthDaySeederJob,
     ActivateAppointmentsJob,
     ExpireAppointmentsJob,

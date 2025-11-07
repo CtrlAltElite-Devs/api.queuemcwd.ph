@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Req } from "@nestjs/common";
+import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
+import { UseAdminOnlyGuard } from "src/security/decorators/index.decorators";
 import { AppointmentService } from "./appointment.service";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dtos/update-appointment.dto";
@@ -18,10 +20,16 @@ export class AppointmentController {
     }
 
     @Patch("/:appointmentId")
+    @UseAdminOnlyGuard()
     async updateAppointmentStatus(
+        @Req() request: AuthenticatedRequest,
         @Param("appointmentId") appointmentId: string,
         @Body() dto: UpdateAppointmentDto,
     ) {
-        return this.service.UpdateAppointmentStatusAsync(appointmentId, dto.queueStatus);
+        return this.service.UpdateAppointmentStatusAsync(
+            request.admin!,
+            appointmentId,
+            dto.queueStatus,
+        );
     }
 }

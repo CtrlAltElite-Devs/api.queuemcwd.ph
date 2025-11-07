@@ -9,8 +9,12 @@ export class SlotsController {
     constructor(private readonly service: SlotsService) {}
 
     @Get("/:slotId")
-    async GetSlot(@Param("slotId", new ParseUUIDPipe()) slotId: string) {
-        return await this.service.GetSlotByIdAsync(slotId);
+    @UseAdminOnlyGuard()
+    async GetSlot(
+        @Req() request: AuthenticatedRequest,
+        @Param("slotId", new ParseUUIDPipe()) slotId: string,
+    ) {
+        return await this.service.GetSlotByIdAsync(request.admin!, slotId);
     }
 
     @Patch("/:slotId")
