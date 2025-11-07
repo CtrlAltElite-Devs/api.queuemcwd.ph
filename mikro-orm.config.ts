@@ -24,4 +24,10 @@ export default defineConfig({
         path: "dist/src/seeders",
         pathTs: "src/seeders",
     },
+    filters: {
+        softDelete: {
+            cond: { deletedAt: null },
+            default: true,
+        },
+    },
 });

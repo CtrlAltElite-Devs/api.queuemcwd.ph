@@ -10,4 +10,11 @@ export abstract class CustomBaseEntity {
 
     @Property()
     updatedAt: Date & Opt = new Date();
+
+    @Property({ nullable: true })
+    deletedAt?: Date & Opt;
+
+    SoftDelete() {
+        this.deletedAt = new Date();
+    }
 }
