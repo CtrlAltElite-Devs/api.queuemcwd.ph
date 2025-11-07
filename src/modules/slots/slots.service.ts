@@ -47,6 +47,10 @@ export class SlotsService {
             throw new UnauthorizedException("Admin is not assigned to the slot's branch");
         }
 
+        if (dto.limit && dto.limit <= 0) {
+            throw new BadRequestException("limit should be atleaset 1");
+        }
+
         const neighborSlots = await this.slotRepository.find({
             monthDay: { id: slot.monthDay.id },
         });
@@ -80,7 +84,7 @@ export class SlotsService {
 
                 if (overlaps) {
                     throw new BadRequestException(
-                        `Time range ${dto.startTime}–${dto.endTime} overlaps with another slot (${neighbor.startTime.toISOString()}–${neighbor.endTime.toISOString()})`,
+                        `Time range ${dto.startTime}–${dto.endTime} overlaps with another slot (${neighbor.startTime.toLocaleTimeString()} –> ${neighbor.endTime.toLocaleTimeString()})`,
                     );
                 }
             }
