@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Appointment } from "src/entities/appointment.entity";
 import { AppointmentType } from "src/enums/appointment-type.enum";
-import { CategoryCode } from "src/enums/category-code.enum";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { BranchDto } from "src/modules/branch/dto/branch.dto";
 import { SlotDto } from "src/modules/slots/dtos/slot.dto";
@@ -21,9 +20,6 @@ export class AppointmentDto {
 
     @ApiProperty()
     contact: string;
-
-    @ApiProperty()
-    categoryCode: CategoryCode;
 
     @ApiProperty()
     dateValidity: Date;
@@ -47,7 +43,6 @@ export class AppointmentDto {
         dto.contactPerson = appointment.contactPerson;
         dto.contact = appointment.contact;
         dto.appointmentCode = appointment.appointmentCode;
-        dto.categoryCode = appointment.categoryCode;
         dto.dateValidity = appointment.dateValidity;
         dto.queueStatus = appointment.queueStatus;
         dto.appointmentType = appointment.appointmentType;

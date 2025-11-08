@@ -1,7 +1,6 @@
 import { Entity, Index, ManyToOne, Opt, Property, Unique } from "@mikro-orm/core";
 import { CreateAppointmentDto } from "src/modules/appointment/dtos/create-appointment.dto";
 import { AppointmentType } from "../enums/appointment-type.enum";
-import { CategoryCode } from "../enums/category-code.enum";
 import { QueueStatus } from "../enums/queue-status.enum";
 import { AppointmentRepository } from "../repositories/appointment.repository";
 import { CustomBaseEntity } from "./base.entity";
@@ -29,10 +28,6 @@ export class Appointment extends CustomBaseEntity {
 
     @Property()
     @Index()
-    categoryCode: CategoryCode;
-
-    @Property()
-    @Index()
     queueStatus: QueueStatus;
 
     @Property()
@@ -50,7 +45,6 @@ export class Appointment extends CustomBaseEntity {
         newAppointment.accountCode = dto.accountCode;
         newAppointment.contactPerson = dto.contactPerson;
         newAppointment.contact = dto.contact;
-        newAppointment.categoryCode = dto.category;
         newAppointment.queueStatus = QueueStatus.PENDING;
         newAppointment.appointmentType = dto.appointmentType;
         newAppointment.queueStatus = QueueStatus.PENDING;
