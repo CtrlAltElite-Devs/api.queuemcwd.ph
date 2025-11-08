@@ -7,7 +7,3 @@ services:
             - .env
         environment:
             - NODE_ENV=development
-        deploy:
-            replicas: 2
-            restart_policy:
-                condition: on-failure
