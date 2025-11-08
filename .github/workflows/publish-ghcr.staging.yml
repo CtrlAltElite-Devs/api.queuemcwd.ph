@@ -80,7 +80,7 @@ jobs:
                       docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
 
                       # 🚀 Stop old containers before starting new ones
-                      docker compose -f docker-compose.staging.yml down
+                      docker compose -p staging -f docker-compose.staging.yml down
 
                       # 🆕 Start new containers
-                      docker compose -f docker-compose.staging.yml up -d
+                      docker compose -p staging -f docker-compose.staging.yml up -d
