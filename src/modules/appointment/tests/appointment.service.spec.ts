@@ -12,6 +12,7 @@ import {
     SLOT_TOO_FAR,
 } from "src/constants/error-messages/appointment.error";
 import { Appointment } from "src/entities/appointment.entity";
+import { Branch } from "src/entities/branch.entity";
 import { MonthDay } from "src/entities/monthDay.entity";
 import { Slot } from "src/entities/slot.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
@@ -24,7 +25,9 @@ import { CreateAppointmentDto } from "../dtos/create-appointment.dto";
 const slotFactory = () => {
     const slot = new Slot();
     const monthDay = new MonthDay();
+    const branch = new Branch();
     slot.monthDay = monthDay;
+    slot.branch = branch;
     return slot;
 };
 
@@ -141,7 +144,9 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(slot);
 
             const dto = new CreateAppointmentDto();
-            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SLOT_TOO_FAR);
+            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
+                SLOT_TOO_FAR(slot.branch.allowedTimeFrame),
+            );
         });
 
         it("should throw if slot is already full", async () => {

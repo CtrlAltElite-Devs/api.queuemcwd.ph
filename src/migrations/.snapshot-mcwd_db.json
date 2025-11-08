@@ -72,6 +72,18 @@
                     "nullable": false,
                     "length": 255,
                     "mappedType": "string"
+                },
+                "allowed_time_frame": {
+                    "name": "allowed_time_frame",
+                    "type": "int",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": false,
+                    "length": null,
+                    "default": "7",
+                    "comment": "in day format",
+                    "mappedType": "integer"
                 }
             },
             "name": "branch",

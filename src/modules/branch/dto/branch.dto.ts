@@ -5,6 +5,7 @@ export class BranchDto {
     name: string;
     branchCode: string;
     address: string;
+    allowedTimeFrame: number;
 
     static Map(branch: Branch): BranchDto {
         const branchDto = new BranchDto();
@@ -12,6 +13,7 @@ export class BranchDto {
         branchDto.name = branch.name;
         branchDto.branchCode = branch.branchCode;
         branchDto.address = branch.address;
+        branchDto.allowedTimeFrame = branch.allowedTimeFrame;
         return branchDto;
     }
 }
