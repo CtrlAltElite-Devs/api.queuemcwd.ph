@@ -50,8 +50,8 @@ jobs:
             - name: Deploy to Staging VPS
               uses: appleboy/ssh-action@v1.0.3
               with:
-                  host: ${{ secrets.VPS_PROD_HOST }}
-                  username: ${{ secrets.VPS_USERNAME }}
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_PROD_USERNAME }}
                   key: ${{ secrets.VPS_SSH_KEY }}
                   script: |
                       DEPLOY_DIR=~/deployments
