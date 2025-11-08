@@ -1,5 +1,6 @@
 services:
     api:
+        container_name: mcwd-api-prod
         image: ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:latest
         ports:
             - "5000:5000"
