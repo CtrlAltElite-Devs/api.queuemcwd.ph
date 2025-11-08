@@ -1,6 +1,6 @@
 services:
     api:
-        image: ghcr.io/CtrlAltElite-Devs/staging-mcwd-api:latest
+        image: ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
         ports:
             - "5001:5001"
         env_file:
