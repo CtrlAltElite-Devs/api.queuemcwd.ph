@@ -1,30 +1,29 @@
-name: Build and Publish Docker Image to GHCR
+name: Build, Publish, and Deploy Docker Image
 
 on:
     push:
         branches:
             - staging
-            - master
 
 env:
     REGISTRY: ghcr.io
-    ORG: ctrlaltelite-devs # GitHub organization
-    IMAGE: api.queuemcwd.ph # Image name
+    ORG: ctrlaltelite-devs
+    IMAGE: api.queuemcwd.ph
 
 jobs:
     build-and-push:
         runs-on: ubuntu-latest
 
         steps:
-            # 1. Checkout repository
+            # 1️⃣ Checkout repository
             - name: Checkout code
               uses: actions/checkout@v4
 
-            # 2. Set up Docker Buildx
+            # 2️⃣ Set up Docker Buildx
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            # 3. Log in to GHCR
+            # 3️⃣ Log in to GHCR
             - name: Log in to GitHub Container Registry
               uses: docker/login-action@v3
               with:
@@ -32,7 +31,7 @@ jobs:
                   username: ${{ secrets.GH_USERNAME }}
                   password: ${{ secrets.GH_PAT }}
 
-            # 4. Determine tag based on branch
+            # 4️⃣ Determine image tag
             - name: Set image tags
               id: vars
               run: |
@@ -45,7 +44,7 @@ jobs:
                   fi
                   echo "SHA_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
 
-            # 5. Build Docker image
+            # 5️⃣ Build Docker image
             - name: Build Docker image
               run: |
                   docker build \
@@ -53,8 +52,55 @@ jobs:
                     -t $REGISTRY/$ORG/$IMAGE:${SHA_TAG} \
                     .
 
-            # 6. Push Docker image to GHCR
+            # 6️⃣ Push Docker image
             - name: Push Docker image
               run: |
                   docker push $REGISTRY/$ORG/$IMAGE:${TAG}
                   docker push $REGISTRY/$ORG/$IMAGE:${SHA_TAG}
+
+            # 7️⃣ Deploy to VPS via SSH
+            - name: Deploy to VPS
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USERNAME }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      DEPLOY_BASE=~/deployments/mcwd
+                      declare -A ENVS
+                      ENVS=( ["staging"]="staging" ["prod"]="master" )
+
+                      for ENV in "${!ENVS[@]}"; do
+                          BRANCH=${ENVS[$ENV]}
+                          ENV_DIR="$DEPLOY_BASE/$ENV"
+                          mkdir -p "$ENV_DIR"
+                          cd "$ENV_DIR"
+
+                          if [ ! -d api.queuemcwd.ph ]; then
+                              git clone --branch "$BRANCH" git@github.com:CtrlAltElite-Devs/api.queuemcwd.ph.git
+                          else
+                              cd api.queuemcwd.ph
+                              git fetch origin
+                              git checkout "$BRANCH"
+                              git pull origin "$BRANCH"
+                              cd ..
+                          fi
+
+                          cd api.queuemcwd.ph
+
+                          TAG="$BRANCH"
+                          SHA_TAG=$(git rev-parse HEAD)
+
+                          docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${TAG}
+                          docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
+
+                          if [[ "$BRANCH" == "master" ]]; then
+                              COMPOSE_FILE="docker-compose.prod.yml"
+                          else
+                              COMPOSE_FILE="docker-compose.staging.yml"
+                          fi
+
+                          echo "Deploying $ENV using $COMPOSE_FILE"
+                          docker compose -f "$COMPOSE_FILE" up -d
+
+                          cd "$DEPLOY_BASE"

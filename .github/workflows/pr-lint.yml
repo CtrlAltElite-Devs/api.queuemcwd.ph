@@ -1,6 +1,11 @@
 name: PR Lint
 
 on:
+    push:
+        branches:
+            - main
+            - staging
+            - "**"
     pull_request:
         branches:
             - main
