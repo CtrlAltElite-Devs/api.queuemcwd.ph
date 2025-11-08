@@ -37,9 +37,7 @@ jobs:
 
             # Run tests
             - name: Run tests
-              run: npm run test:ci
-              env:
-                  NODE_ENV: test
+              run: npm run test
 
             # Save dist cache after build
             - name: Save dist cache
