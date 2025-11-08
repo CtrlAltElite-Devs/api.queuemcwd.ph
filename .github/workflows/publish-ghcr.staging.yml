@@ -9,7 +9,7 @@ env:
     REGISTRY: ghcr.io
     ORG: ctrlaltelite-devs
     IMAGE: api.queuemcwd.ph
-    TAG: staging # Hardcoded for staging
+    TAG: staging
 
 jobs:
     build-and-push:
@@ -71,6 +71,9 @@ jobs:
                       cd api.queuemcwd.ph
 
                       SHA_TAG=$(git rev-parse HEAD)
+
+                      # Log in to GHCR on VPS
+                      echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u "${{ secrets.GH_USERNAME }}" --password-stdin
 
                       # Pull latest staging image
                       docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
