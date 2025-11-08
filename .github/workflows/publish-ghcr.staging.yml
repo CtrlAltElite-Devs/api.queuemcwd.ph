@@ -79,5 +79,9 @@ jobs:
                       docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
                       docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
 
+                      # Stop and remove any existing containers before deploying
+                      docker compose -f docker-compose.staging.yml down || true
+                      docker system prune -af || true
+
                       # Deploy using staging compose file
                       docker compose -f docker-compose.staging.yml up -d
