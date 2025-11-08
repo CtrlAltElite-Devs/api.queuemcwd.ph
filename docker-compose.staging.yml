@@ -1,6 +1,6 @@
 services:
     api:
-        container_name: mcwd-api-prod
+        container_name: mcwd-api-staging
         image: ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
         ports:
             - "5001:5001"
