@@ -33,7 +33,7 @@ export class AppointmentValidator {
 
         const now = moment();
         const today = now.clone().startOf("day");
-        const sevenDaysFromNow = now.clone().add(7, "days").endOf("day");
+        const allowedTimeFrame = now.clone().add(slot.branch.allowedTimeFrame, "days").endOf("day");
         const slotDate = slot.monthDay.ConvertToMoment();
 
         if (slotDate.isSame(today, "day")) {
@@ -44,8 +44,8 @@ export class AppointmentValidator {
             throw new BadRequestException(SLOT_DATE_PASSED);
         }
 
-        if (slotDate.isAfter(sevenDaysFromNow, "day")) {
-            throw new BadRequestException(SLOT_TOO_FAR);
+        if (slotDate.isAfter(allowedTimeFrame, "day")) {
+            throw new BadRequestException(SLOT_TOO_FAR(slot.branch.allowedTimeFrame));
         }
 
         const activeAppointments = slot.appointments
