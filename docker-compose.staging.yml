@@ -1,13 +1,14 @@
 services:
     api:
-        image: ghcr.io/CtrlAltElite-Devs/staging-mcwd-api:latest
+        image: ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
         ports:
-            - "5001: 5001"
+            - "5001:5001"
         env_file:
             - .env
         environment:
             - NODE_ENV=development
-        deploy:
-            replicas: 2
-            restart_policy:
-                condition: on-failure
+        networks:
+            - mcwd-network-staging
+networks:
+    mcwd-network-staging:
+        external: true

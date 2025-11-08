@@ -24,4 +24,9 @@ export class AppController {
     getProtectedForSuper(): string {
         return "protected for super";
     }
+
+    @Get("new-endpoint")
+    getNewEndpoint(): string {
+        return "new endpoint from ci/cd";
+    }
 }
