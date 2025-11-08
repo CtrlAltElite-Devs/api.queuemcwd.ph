@@ -79,7 +79,7 @@ jobs:
                       docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
 
                       # 🚀 Stop old containers before starting new ones
-                      docker compose -f docker-compose.prod.yml down
+                      docker compose -p prod -f docker-compose.prod.yml down
 
                       # 🆕 Start new containers
-                      docker compose -f docker-compose.prod.yml up -d
+                      docker compose -p prod -f docker-compose.prod.yml up -d
