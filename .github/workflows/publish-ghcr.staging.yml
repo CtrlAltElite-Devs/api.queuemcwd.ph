@@ -1,0 +1,80 @@
+name: Build, Publish, and Deploy Docker Image (Staging)
+
+on:
+    push:
+        branches:
+            - staging
+
+env:
+    REGISTRY: ghcr.io
+    ORG: ctrlaltelite-devs
+    IMAGE: api.queuemcwd.ph
+    TAG: staging # Hardcoded for staging
+
+jobs:
+    build-and-push:
+        runs-on: ubuntu-latest
+
+        steps:
+            # 1️⃣ Checkout repository
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # 2️⃣ Set up Docker Buildx
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            # 3️⃣ Log in to GHCR
+            - name: Log in to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ secrets.GH_USERNAME }}
+                  password: ${{ secrets.GH_PAT }}
+
+            # 4️⃣ Build Docker image
+            - name: Build Docker image
+              run: |
+                  docker build \
+                    -t $REGISTRY/$ORG/$IMAGE:${TAG} \
+                    -t $REGISTRY/$ORG/$IMAGE:${GITHUB_SHA} \
+                    .
+
+            # 5️⃣ Push Docker image
+            - name: Push Docker image
+              run: |
+                  docker push $REGISTRY/$ORG/$IMAGE:${TAG}
+                  docker push $REGISTRY/$ORG/$IMAGE:${GITHUB_SHA}
+
+            # 6️⃣ Deploy to VPS via SSH
+            - name: Deploy to Staging VPS
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USERNAME }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      DEPLOY_DIR=~/deployments/mcwd/staging
+                      mkdir -p "$DEPLOY_DIR"
+                      cd "$DEPLOY_DIR"
+
+                      if [ ! -d api.queuemcwd.ph ]; then
+                          git clone --branch staging git@github.com:CtrlAltElite-Devs/api.queuemcwd.ph.git
+                      else
+                          cd api.queuemcwd.ph
+                          git fetch origin
+                          git checkout staging
+                          git pull origin staging
+                          cd ..
+                      fi
+
+                      cd api.queuemcwd.ph
+
+                      SHA_TAG=$(git rev-parse HEAD)
+
+                      # Pull latest staging image
+                      docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
+                      docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
+
+                      # Deploy using staging compose file
+                      docker compose -f docker-compose.staging.yml up -d
