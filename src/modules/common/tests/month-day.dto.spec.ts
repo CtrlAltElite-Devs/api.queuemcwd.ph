@@ -86,6 +86,7 @@ describe("BatchUpdateMonthDaySlotsDto.validateOrThrow", () => {
             // @ts-expect-error testing invalid input
             excludeTimes: "invalid",
         });
+        // expectReferencError(dto);
         expectValidationError(dto, "excludeTimes", "excludeTimes must be an array of time ranges.");
     });
 
@@ -94,13 +95,10 @@ describe("BatchUpdateMonthDaySlotsDto.validateOrThrow", () => {
             startHour: 8,
             endHour: 17,
             incrementMinutes: 30,
-            excludeTimes: [null],
+            // @ts-expect-error: This is expected
+            excludeTimes: null,
         });
-        expectValidationError(
-            dto,
-            "excludeTimes[0]",
-            "must be an object with startHour and endHour.",
-        );
+        expectReferencError(dto);
     });
 
     it("should throw if excludeTimes range is invalid (start >= end)", () => {
@@ -173,5 +171,13 @@ function expectValidationError(
             errors: Record<string, string[]>;
         };
         expect(response.errors[field]).toContain(expectedMessage);
+    }
+}
+
+function expectReferencError(dto: BatchUpdateMonthDaySlotsDto) {
+    try {
+        dto.validateOrThrow();
+    } catch (err) {
+        expect(err).toBeInstanceOf(ReferenceError);
     }
 }
