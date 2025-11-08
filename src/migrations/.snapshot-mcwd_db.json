@@ -645,16 +645,6 @@
                     "length": null,
                     "mappedType": "datetime"
                 },
-                "category_code": {
-                    "name": "category_code",
-                    "type": "varchar(255)",
-                    "unsigned": false,
-                    "autoincrement": false,
-                    "primary": false,
-                    "nullable": false,
-                    "length": 255,
-                    "mappedType": "string"
-                },
                 "queue_status": {
                     "name": "queue_status",
                     "type": "varchar(255)",
@@ -705,14 +695,6 @@
                     "constraint": true,
                     "primary": false,
                     "unique": true
-                },
-                {
-                    "columnNames": ["category_code"],
-                    "composite": false,
-                    "keyName": "appointment_category_code_index",
-                    "constraint": false,
-                    "primary": false,
-                    "unique": false
                 },
                 {
                     "columnNames": ["queue_status"],
