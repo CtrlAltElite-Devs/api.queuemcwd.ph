@@ -98,10 +98,11 @@ jobs:
                              "name": "${{ github.event.pull_request.user.login }}",
                              "icon_url": "${{ github.event.pull_request.user.avatar_url }}"
                           },
-                          "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
+                          "description": "${{ env.TEST_STATUS }}",
                           "color": ${{ env.EMBED_COLOR }},
                           "fields": [
-                              { "name": "Branch / PR", "value": "${{ github.ref_name }}", "inline": true },
+                              { "name": "Passed", "value": "${{ env.PASSED  }} / ${{ env.TOTAL }}", "inline": true },
+                              { "name": "Failed", "value": "${{ env.FAILED  }}", "inline": true },
                               { "name": "Commit", "value": "${{ github.sha }}" }
                           ],
                           "footer": { "text": "GitHub Actions" },
