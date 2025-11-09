@@ -106,7 +106,7 @@ jobs:
                          "fields": [
                              {
                                 "name": "Results",
-                                "value": "${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
+                                "value": "Passed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
                                 "inline": true
                              },
                              {
