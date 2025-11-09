@@ -50,7 +50,12 @@ describe("AppointmentService", () => {
                     return { Commit: jest.fn() };
                 }
                 if (token === AppointmentRepository) {
-                    return { findOne: jest.fn(), save: jest.fn() };
+                    return {
+                        findOne: jest.fn(),
+                        save: jest.fn(),
+                        GenerateUniqueAppointmentCodeAsync: jest.fn(),
+                        create: jest.fn(),
+                    };
                 }
                 if (token === SlotsRepository) {
                     return { findOne: jest.fn() };
@@ -136,7 +141,21 @@ describe("AppointmentService", () => {
             slot.isActive = true;
             slot.monthDay.isWorkingDay = true;
 
-            const future = moment().add(8, "days"); // beyond 7 days
+            // Assume allowedTimeFrame = 7 days (but weekends are excluded)
+            const allowedTimeFrame = slot.branch.allowedTimeFrame;
+
+            // Start from today and add working days only
+            const future = moment();
+            let added = 0;
+            while (added <= allowedTimeFrame) {
+                future.add(1, "day");
+                if (![6, 0].includes(future.day())) {
+                    // skip Saturday (6) & Sunday (0)
+                    added++;
+                }
+            }
+
+            // Now future is 1 working day *beyond* allowed frame
             slot.monthDay.year = future.year();
             slot.monthDay.month = future.month() + 1; // month() is 0-based
             slot.monthDay.day = future.date();
@@ -144,6 +163,7 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(slot);
 
             const dto = new CreateAppointmentDto();
+
             await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
                 SLOT_TOO_FAR(slot.branch.allowedTimeFrame),
             );
