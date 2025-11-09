@@ -20,15 +20,10 @@ export class SlotsService {
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
-    async GetSlotByIdAsync(admin: AdminDto, slotId: string) {
-        const slot = await this.slotRepository.findOne(
-            { id: slotId },
-            { populate: ["appointments", "monthDay", "branch"] },
-        );
-        if (slot === null) throw new NotFoundException("slot not found");
-
-        BranchAdminValidator.EnsureIsAssignedToBranch(admin, slot.branch);
-
+    async GetSlotByIdAsync(slot: Slot) {
+        await this.monthDayRepository
+            .getEntityManager()
+            .populate(slot, ["appointments", "monthDay"]);
         const dto = SlotDto.Map(slot);
         dto.booked = slot.appointments.filter(
             (a) => a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING,
@@ -37,14 +32,8 @@ export class SlotsService {
         return dto;
     }
 
-    async UpdateSlotAsync(admin: AdminDto, slotId: string, dto: UpdateSlotDto) {
-        const slot = await this.slotRepository.findOne(
-            { id: slotId },
-            { populate: ["branch", "monthDay"] },
-        );
-        if (!slot) throw new BadRequestException("Slot id not found");
-
-        BranchAdminValidator.EnsureIsAssignedToBranch(admin, slot.branch);
+    async UpdateSlotAsync(slot: Slot, dto: UpdateSlotDto) {
+        await this.monthDayRepository.getEntityManager().populate(slot, ["branch", "monthDay"]);
 
         SlotValidator.ValidateLimit(dto.limit);
 
@@ -58,7 +47,7 @@ export class SlotsService {
                 startTime: dto.startTime,
                 endTime: dto.endTime,
                 neighborSlots: neighborSlots,
-                currentSlotId: slotId,
+                currentSlotId: slot.id,
             });
 
             const baseDate = slot.monthDay.ConvertToMoment();
@@ -122,22 +111,9 @@ export class SlotsService {
         return SlotDto.Map(newSlot);
     }
 
-    async DeleteSlot(admin: AdminDto, slotId: string) {
-        const slot = await this.slotRepository.findOne(
-            {
-                id: slotId,
-            },
-            { populate: ["branch"] },
-        );
-
-        if (slot === null) throw new NotFoundException("Slot not found");
-
-        BranchAdminValidator.EnsureIsAssignedToBranch(admin, slot.branch);
-
+    async DeleteSlot(slot: Slot) {
         slot.SoftDelete();
-
         await this.unitOfWork.Commit();
-
         return {
             message: `Slot: ${slot.id} was deleted`,
         };
