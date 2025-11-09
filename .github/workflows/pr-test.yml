@@ -94,12 +94,14 @@ jobs:
                   DISCORD_EMBEDS: |
                       [
                           {
-                          "title": "PR Test Result ni dawg 🚀",
+                          "author": {
+                             "name": "${{ github.event.pull_request.user.name }}",
+                             "icon_url": "${{ github.event.pull_request.user.avatar_url }}"
+                          },
                           "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
                           "color": ${{ env.EMBED_COLOR }},
                           "fields": [
                               { "name": "Branch / PR", "value": "${{ github.ref_name }}", "inline": true },
-                              { "name": "Triggered by", "value": "${{ github.actor }}", "inline": true },
                               { "name": "Commit", "value": "${{ github.sha }}" }
                           ],
                           "footer": { "text": "GitHub Actions" },
@@ -108,4 +110,4 @@ jobs:
                       ]
               uses: Ilshidur/action-discord@0.4.0
               with:
-                  args: ${{ env.TEST_STATUS == '✅ All tests passed, nice ka 👌' && 'Yoo naay nag Pull request ‼️‼️' || 'Uy dawg naay bagsak sa tests 😭‼️' }}
+                  args: ${{ env.TEST_STATUS == '✅ All tests passed, nice ka 👌' && 'PR Test Result ni dawg 🚀' || 'Uy dawg naay bagsak sa tests 😭‼️' }}
