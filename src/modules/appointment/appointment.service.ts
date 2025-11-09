@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Appointment } from "src/entities/appointment.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
+import { BranchAdminValidator } from "../common/validators/branch-admin.validator";
 import { AppointmentDto } from "./dtos/appointment.dto";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 import { AppointmentValidator } from "./validators/appointment.validator";
@@ -62,9 +63,7 @@ export class AppointmentService {
             throw new BadRequestException("Appointment ID not found");
         }
 
-        if (appointment.branch.id !== admin.branchId) {
-            throw new UnauthorizedException("admin cannot update appointment from another branch");
-        }
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, appointment.branch);
 
         const now = new Date();
 

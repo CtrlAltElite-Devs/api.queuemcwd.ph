@@ -1,9 +1,4 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import moment from "moment";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
@@ -11,6 +6,7 @@ import { SlotsRepository } from "src/repositories/slots.repository";
 import { Slot } from "../../entities/slot.entity";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
+import { BranchAdminValidator } from "../common/validators/branch-admin.validator";
 import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
@@ -30,8 +26,8 @@ export class SlotsService {
             { populate: ["appointments", "monthDay", "branch"] },
         );
         if (slot === null) throw new NotFoundException("slot not found");
-        if (slot.branch.id !== admin.branchId)
-            throw new UnauthorizedException("this admin is not assigned to the slot's branch");
+
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, slot.branch);
 
         const dto = SlotDto.Map(slot);
         dto.booked = slot.appointments.filter(
@@ -48,9 +44,7 @@ export class SlotsService {
         );
         if (!slot) throw new BadRequestException("Slot id not found");
 
-        if (admin.branchId !== slot.branch.id) {
-            throw new UnauthorizedException("Admin is not assigned to the slot's branch");
-        }
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, slot.branch);
 
         SlotValidator.ValidateLimit(dto.limit);
 
@@ -97,9 +91,7 @@ export class SlotsService {
 
         if (monthDay === null) throw new NotFoundException("Month day not found");
 
-        if (monthDay.branch.id !== admin.branchId) {
-            throw new UnauthorizedException("Admin is not assigned to this branch");
-        }
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, monthDay.branch);
 
         SlotValidator.ValidateLimit(dto.limit);
 
@@ -140,8 +132,7 @@ export class SlotsService {
 
         if (slot === null) throw new NotFoundException("Slot not found");
 
-        if (slot.branch.id !== admin.branchId)
-            throw new UnauthorizedException("Admin is not under this branch");
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, slot.branch);
 
         slot.SoftDelete();
 
