@@ -94,7 +94,7 @@ jobs:
                   DISCORD_EMBEDS: |
                       [
                         {
-                          "title": "PR Test Result ni dawg 🚀"",
+                          "title": "PR Test Result ni dawg 🚀",
                           "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
                           "color": ${{ env.EMBED_COLOR }},
                           "fields": [
