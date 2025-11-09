@@ -1,16 +1,7 @@
 import { Collection } from "@mikro-orm/core";
 import { Test, TestingModule } from "@nestjs/testing";
 import moment from "moment";
-import {
-    SLOT_ALREADY_ENDED,
-    SLOT_DATE_PASSED,
-    SLOT_FULL,
-    SLOT_ID_NOT_FOUND,
-    SLOT_NOT_ACTIVE,
-    SLOT_NOT_ON_WORKING_DAY,
-    SLOT_TODAY_NOT_ALLOWED,
-    SLOT_TOO_FAR,
-} from "src/constants/error-messages/appointment.error";
+import { SLOT_TOO_FAR, SlotErrors } from "src/constants/error-messages/appointment.error";
 import { Appointment } from "src/entities/appointment.entity";
 import { Branch } from "src/entities/branch.entity";
 import { MonthDay } from "src/entities/monthDay.entity";
@@ -68,7 +59,9 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(null);
 
             const dto = new CreateAppointmentDto();
-            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SLOT_ID_NOT_FOUND);
+            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
+                SlotErrors.SLOT_ID_NOT_FOUND,
+            );
         });
 
         it("should throw if month day is not a working day", async () => {
@@ -78,7 +71,7 @@ describe("AppointmentService", () => {
 
             const dto = new CreateAppointmentDto();
             await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
-                SLOT_NOT_ON_WORKING_DAY,
+                SlotErrors.SLOT_NOT_ON_WORKING_DAY,
             );
         });
 
@@ -89,7 +82,9 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(slot);
 
             const dto = new CreateAppointmentDto();
-            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SLOT_ALREADY_ENDED);
+            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
+                SlotErrors.SLOT_ALREADY_ENDED,
+            );
         });
 
         it("should throw if slot is not active", async () => {
@@ -99,7 +94,9 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(slot);
 
             const dto = new CreateAppointmentDto();
-            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SLOT_NOT_ACTIVE);
+            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
+                SlotErrors.SLOT_NOT_ACTIVE,
+            );
         });
 
         it("should throw if slot date is today", async () => {
@@ -113,7 +110,7 @@ describe("AppointmentService", () => {
 
             const dto = new CreateAppointmentDto();
             await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
-                SLOT_TODAY_NOT_ALLOWED,
+                SlotErrors.SLOT_TODAY_NOT_ALLOWED,
             );
         });
 
@@ -128,7 +125,9 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(slot);
 
             const dto = new CreateAppointmentDto();
-            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SLOT_DATE_PASSED);
+            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(
+                SlotErrors.SLOT_DATE_PASSED,
+            );
         });
 
         it("should throw if slot date is too far", async () => {
@@ -171,7 +170,7 @@ describe("AppointmentService", () => {
             slotsRepo.findOne.mockResolvedValueOnce(slot);
 
             const dto = new CreateAppointmentDto();
-            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SLOT_FULL);
+            await expect(service.CreateAppointmentAsync(dto)).rejects.toThrow(SlotErrors.SLOT_FULL);
         });
     });
 

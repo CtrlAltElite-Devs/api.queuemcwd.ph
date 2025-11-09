@@ -1,10 +1,4 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from "@nestjs/common";
-import { AdminRole } from "src/entities/admin.entity";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
@@ -14,6 +8,7 @@ import { createMonthDays } from "src/utils/generate-month-days.util";
 import { getCurrentMonthMetadata, getMonthMetadata } from "src/utils/get-current-month-data.util";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
+import { BranchAdminValidator } from "../common/validators/branch-admin.validator";
 import { MonthDayDto } from "../month-day/dtos/month-day.dto";
 import { SeedMonthDayDto } from "../month-day/dtos/seed-month-day.dto";
 import { MonthDayResourceParameter } from "../month-day/resource-parameters/month-day.params";
@@ -136,9 +131,7 @@ export class BranchService {
             throw new BadRequestException("Branch not found");
         }
 
-        if (admin.branchId !== branch.id) {
-            throw new UnauthorizedException("admin is not assigned to this branch");
-        }
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, branch);
 
         const monthMetaData = getMonthMetadata(dto.month, dto.year);
 
@@ -172,11 +165,9 @@ export class BranchService {
             { populate: ["admins"] },
         );
         if (branch === null) throw new NotFoundException("Branch not found");
-        if (admin.role !== AdminRole.SUPER_ADMIN) {
-            if (admin.branchId !== branch.id) {
-                throw new UnauthorizedException("Admin is not assigned to this branch");
-            }
-        }
+
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, branch);
+
         branch.Update(dto);
         await this.unitOfWork.Commit();
         return branch;
