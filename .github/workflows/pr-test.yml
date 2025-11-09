@@ -93,22 +93,19 @@ jobs:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
                   DISCORD_EMBEDS: |
                       [
-                        {
+                          {
                           "title": "PR Test Result ni dawg 🚀",
                           "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
                           "color": ${{ env.EMBED_COLOR }},
                           "fields": [
-                            { "name": "Branch / PR", "value": "${{ github.ref_name }}", "inline": true },
-                            { "name": "Triggered by", "value": "${{ github.actor }}", "inline": true },
-                            { "name": "Commit", "value": "${{ github.sha }}" }
+                              { "name": "Branch / PR", "value": "${{ github.ref_name }}", "inline": true },
+                              { "name": "Triggered by", "value": "${{ github.actor }}", "inline": true },
+                              { "name": "Commit", "value": "${{ github.sha }}" }
                           ],
-                          "footer": { "text": "GitHub Actions },
+                          "footer": { "text": "GitHub Actions" },
                           "timestamp": "${{ github.event.head_commit.timestamp }}"
-                        }
-                        ${{
-                          env.FAILED != '0' && format(',{{"title": "❌ Failed Tests (Top 5)", "description": {0}, "color": 15158332 }}', env.FAILED_LIST) || ''
-                        }}
+                          }
                       ]
               uses: Ilshidur/action-discord@0.4.0
               with:
-                  args: "Yoo naay nag Pull request ‼️‼️"
+                  args: ${{ env.TEST_STATUS == '✅ All tests passed, nice ka 👌' && 'Yoo naay nag Pull request ‼️‼️' || 'Uy dawg naay bagsak sa tests 😭‼️' }}
