@@ -13,6 +13,18 @@ import {
 import { Slot } from "src/entities/slot.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 
+function addWorkingDays(date: moment.Moment, days: number): moment.Moment {
+    const result = date.clone();
+    while (days > 0) {
+        result.add(1, "day");
+        const day = result.isoWeekday(); // 6 = Saturday, 7 = Sunday
+        if (day !== 6 && day !== 7) {
+            days--;
+        }
+    }
+    return result.endOf("day");
+}
+
 export class AppointmentValidator {
     static validateSlot(slot: Slot | null): void {
         if (!slot) {
@@ -33,7 +45,7 @@ export class AppointmentValidator {
 
         const now = moment();
         const today = now.clone().startOf("day");
-        const allowedTimeFrame = now.clone().add(slot.branch.allowedTimeFrame, "days").endOf("day");
+        const allowedTimeFrame = addWorkingDays(now, slot.branch.allowedTimeFrame);
         const slotDate = slot.monthDay.ConvertToMoment();
 
         if (slotDate.isSame(today, "day")) {
