@@ -88,6 +88,7 @@ jobs:
                   key: dist-${{ github.sha }}
 
             - name: Discord notification
+              if: ${{ github.event_name == 'pull_request' }}
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
                   DISCORD_USERNAME: "PR Tanod"
@@ -114,7 +115,6 @@ jobs:
                                 "value": "${{ github.sha }}"
                              }
                          ],
-                         "footer": { "text": "GitHub Actions" },
                          "timestamp": "${{ github.event.pull_request.updated_at }}"
                          }
                       ]
