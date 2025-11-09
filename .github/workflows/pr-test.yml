@@ -95,7 +95,7 @@ jobs:
                       [
                           {
                           "author": {
-                             "name": "${{ github.event.pull_request.user.name }}",
+                             "name": "${{ github.event.pull_request.user.login }}",
                              "icon_url": "${{ github.event.pull_request.user.avatar_url }}"
                           },
                           "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
