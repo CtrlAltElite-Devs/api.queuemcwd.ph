@@ -44,7 +44,7 @@ jobs:
             - name: Run tests
               id: run-tests
               run: |
-                  npm run test -- --json --outputFile=jest-results.json || true
+                  run: npm run test || true
                   # Always continue even if tests fail, so we can still send the report
 
             # Extract test summary
