@@ -91,6 +91,8 @@ jobs:
             - name: Discord notification
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
+                  DISCORD_USERNAME: "PR Tanod"
+                  DISCORD_AVATAR: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDmXOAZ7hdOFtFyY-WGiqeFL97-uIprWQFKg&s"
                   DISCORD_EMBEDS: |
                       [
                           {
