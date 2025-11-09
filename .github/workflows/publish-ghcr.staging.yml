@@ -16,6 +16,16 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            # Deployment Started
+            - name: Deployment to Staging notification
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+                  DISCORD_USERNAME: "Lebron James"
+                  DISCORD_AVATAR: "https://cdn.basketballnews.com/images/images/players/headshots/e23a8ab1-a00b-424d-a8f5-b9bb08088e0a_320w.png"
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "Yo what's up! It's ya boi Lebron James 🏀, si ${{github.actor}} kay nag deploy diay to STAGING. Tabangan natog ampo mga dawg 🙏"
+
             # 1️⃣ Checkout repository
             - name: Checkout code
               uses: actions/checkout@v4
@@ -84,3 +94,25 @@ jobs:
 
                       # 🆕 Start new containers
                       docker compose -p staging -f docker-compose.staging.yml up -d
+
+            # if deployment failed
+            - name: Failed Deployment to staging notification
+              if: failure()
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+                  DISCORD_USERNAME: "Lebron James"
+                  DISCORD_AVATAR: "https://cdn.basketballnews.com/images/images/players/headshots/e23a8ab1-a00b-424d-a8f5-b9bb08088e0a_320w.png"
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "Yo guys! ang deployment ni ${{github.actor}} naguba BWAHAHAHAHA."
+
+            # if deployment succeeded
+            - name: Successful Deployment to staging
+              if: success()
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+                  DISCORD_USERNAME: "Lebron James"
+                  DISCORD_AVATAR: "https://cdn.basketballnews.com/images/images/players/headshots/e23a8ab1-a00b-424d-a8f5-b9bb08088e0a_320w.png"
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "Let's gooo!! Deployment to Staging successful ✅🚀, nice ka dawg ${{github.actor}}."
