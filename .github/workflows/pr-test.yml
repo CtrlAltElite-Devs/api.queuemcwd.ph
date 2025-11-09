@@ -60,7 +60,7 @@ jobs:
                   echo "TOTAL=$TOTAL" >> $GITHUB_ENV
 
                   if [ "$FAILED" -eq 0 ]; then
-                    echo "TEST_STATUS=✅ All tests passed" >> $GITHUB_ENV
+                    echo "TEST_STATUS=✅ All tests passed, nice ka 👌" >> $GITHUB_ENV
                     echo "EMBED_COLOR=3066993" >> $GITHUB_ENV
                     echo "FAILED_LIST=" >> $GITHUB_ENV
                   else
@@ -94,15 +94,15 @@ jobs:
                   DISCORD_EMBEDS: |
                       [
                         {
-                          "title": "PR Test Result",
+                          "title": "PR Test Result ni dawg 🚀"",
                           "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
                           "color": ${{ env.EMBED_COLOR }},
                           "fields": [
                             { "name": "Branch / PR", "value": "${{ github.ref_name }}", "inline": true },
-                            { "name": "Commit", "value": "${{ github.sha }}", "inline": true },
-                            { "name": "Triggered by", "value": "${{ github.actor }}", "inline": true }
+                            { "name": "Triggered by", "value": "${{ github.actor }}", "inline": true },
+                            { "name": "Commit", "value": "${{ github.sha }}" }
                           ],
-                          "footer": { "text": "GitHub Actions" },
+                          "footer": { "text": "GitHub Actions },
                           "timestamp": "${{ github.event.head_commit.timestamp }}"
                         }
                         ${{
@@ -111,4 +111,4 @@ jobs:
                       ]
               uses: Ilshidur/action-discord@0.4.0
               with:
-                  args: "PR test notification"
+                  args: "Yoo naay nag Pull request ‼️‼️"
