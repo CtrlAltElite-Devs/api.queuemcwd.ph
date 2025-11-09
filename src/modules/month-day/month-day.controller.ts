@@ -37,4 +37,13 @@ export class MonthDayController {
     ) {
         return await this.service.EditSlotsForMonthDay(request.admin!, monthDayId, body);
     }
+
+    @Get("/:monthDayId/appointments")
+    @UseAdminOnlyGuard()
+    async getAppointmentsFromMonthDay(
+        @Req() request: AuthenticatedRequest,
+        @Param("monthDayId", new ParseUUIDPipe()) monthDayId: string,
+    ) {
+        return await this.service.GetAppointmentsFromMonthday(request.admin!, monthDayId);
+    }
 }

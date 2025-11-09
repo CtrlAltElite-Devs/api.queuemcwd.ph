@@ -1,12 +1,14 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { BranchAdminError } from "src/constants/error-messages/branch-admin.error";
 import { Branch } from "src/entities/branch.entity";
 import { MonthDay } from "src/entities/monthDay.entity";
 import { AdminDto } from "src/modules/admin/dto/admin.dto";
+import { UnitOfWork } from "src/modules/common/unit-of-work";
 import { BatchUpdateMonthDaySlotsDto } from "src/modules/month-day/dtos/batch-update/batch-update-month-day-slots.dto";
 import { CreateMonthDayOptionsDto } from "src/modules/month-day/dtos/batch-update/options.dto";
 import { MonthDayService } from "src/modules/month-day/month-day.service";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
-import { UnitOfWork } from "../unit-of-work";
+import { SlotsRepository } from "src/repositories/slots.repository";
 
 jest.mock("src/utils/generate-month-days.util");
 
@@ -30,6 +32,9 @@ describe("MonthDayService", () => {
                 }
                 if (token === MonthDayRepository) {
                     return { findOne: jest.fn() };
+                }
+                if (token === SlotsRepository) {
+                    return { findAll: jest.fn() };
                 }
             })
             .compile();
@@ -60,7 +65,7 @@ describe("MonthDayService", () => {
 
             await expect(
                 service.EditSlotsForMonthDay(admin, "id", ValidDtoFactory()),
-            ).rejects.toThrow("Admin cannot manage this month day");
+            ).rejects.toThrow(BranchAdminError.NOT_ASSIGNED);
         });
     });
 });
