@@ -87,30 +87,36 @@ jobs:
                   path: dist
                   key: dist-${{ github.sha }}
 
-            # Send Discord notification
             - name: Discord notification
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
                   DISCORD_USERNAME: "PR Tanod"
                   DISCORD_AVATAR: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDmXOAZ7hdOFtFyY-WGiqeFL97-uIprWQFKg&s"
-                  DISCORD_EMBEDS: |
+                  DISCORD_EMBEDS: >
                       [
-                          {
-                          "author": {
+                         {
+                         "author": {
                              "name": "${{ github.event.pull_request.user.login }}",
                              "icon_url": "${{ github.event.pull_request.user.avatar_url }}"
-                          },
-                          "title: "${{github.event.pull_request.title}}",
-                          "url": "${{github.event.pull_request.html_url}}",
-                          "description": "${{ env.TEST_STATUS }}",
-                          "color": ${{ env.EMBED_COLOR }},
-                          "fields": [
-                              { "name": "Results", "value": "${{ env.PASSED  }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}", "inline": true },
-                              { "name": "Commit", "value": "${{ github.sha }}" }
-                          ],
-                          "footer": { "text": "GitHub Actions" },
-                          "timestamp": "${{ github.event.commits.timestamp }}"
-                          }
+                         },
+                         "title": "${{ github.event.pull_request.title }}",
+                         "url": "${{ github.event.pull_request.html_url }}",
+                         "description": "${{ env.TEST_STATUS }}",
+                         "color": ${{ env.EMBED_COLOR }},
+                         "fields": [
+                             {
+                                "name": "Results",
+                                "value": "${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
+                                "inline": true
+                             },
+                             {
+                                "name": "Commit",
+                                "value": "${{ github.sha }}"
+                             }
+                         ],
+                         "footer": { "text": "GitHub Actions" },
+                         "timestamp": "${{ github.event.pull_request.updated_at }}"
+                         }
                       ]
               uses: Ilshidur/action-discord@0.4.0
               with:
