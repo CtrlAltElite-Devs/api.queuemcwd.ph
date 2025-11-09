@@ -29,7 +29,7 @@ jobs:
                   node-version: 24
                   cache: "npm"
 
-            # Restore dist cache (optional if you want to reuse previous builds)
+            # Restore dist cache (optional)
             - name: Restore dist cache
               uses: actions/cache@v3
               with:
@@ -40,9 +40,45 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
-            # Run tests
+            # Run tests and output JSON results
             - name: Run tests
-              run: npm run test
+              id: run-tests
+              run: |
+                  npm run test -- --json --outputFile=jest-results.json || true
+                  # Always continue even if tests fail, so we can still send the report
+
+            # Extract test summary
+            - name: Extract test summary
+              id: test-summary
+              run: |
+                  PASSED=$(jq '.numPassedTests' jest-results.json)
+                  FAILED=$(jq '.numFailedTests' jest-results.json)
+                  TOTAL=$(jq '.numTotalTests' jest-results.json)
+
+                  echo "PASSED=$PASSED" >> $GITHUB_ENV
+                  echo "FAILED=$FAILED" >> $GITHUB_ENV
+                  echo "TOTAL=$TOTAL" >> $GITHUB_ENV
+
+                  if [ "$FAILED" -eq 0 ]; then
+                    echo "TEST_STATUS=✅ All tests passed" >> $GITHUB_ENV
+                    echo "EMBED_COLOR=3066993" >> $GITHUB_ENV
+                    echo "FAILED_LIST=" >> $GITHUB_ENV
+                  else
+                    echo "TEST_STATUS=❌ Some tests failed" >> $GITHUB_ENV
+                    echo "EMBED_COLOR=15158332" >> $GITHUB_ENV
+
+                    # Extract up to 5 failed test names
+                    FAILED_LIST=$(jq -r '[.testResults[].assertionResults[] | select(.status=="failed") | .fullName][0:5] | join("\n• ")' jest-results.json)
+                    if [ -z "$FAILED_LIST" ]; then
+                      FAILED_LIST="(Failed test names not found)"
+                    else
+                      FAILED_LIST="• $FAILED_LIST"
+                    fi
+
+                    # Escape quotes/newlines for Discord JSON
+                    FAILED_LIST_ESCAPED=$(echo "$FAILED_LIST" | jq -Rs .)
+                    echo "FAILED_LIST=$FAILED_LIST_ESCAPED" >> $GITHUB_ENV
+                  fi
 
             # Save dist cache after build
             - name: Save dist cache
@@ -50,3 +86,29 @@ jobs:
               with:
                   path: dist
                   key: dist-${{ github.sha }}
+
+            # Send Discord notification
+            - name: Discord notification
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
+                  DISCORD_EMBEDS: |
+                      [
+                        {
+                          "title": "PR Test Result",
+                          "description": "${{ env.TEST_STATUS }}\nPassed: ${{ env.PASSED }} / ${{ env.TOTAL }}, Failed: ${{ env.FAILED }}",
+                          "color": ${{ env.EMBED_COLOR }},
+                          "fields": [
+                            { "name": "Branch / PR", "value": "${{ github.ref_name }}", "inline": true },
+                            { "name": "Commit", "value": "${{ github.sha }}", "inline": true },
+                            { "name": "Triggered by", "value": "${{ github.actor }}", "inline": true }
+                          ],
+                          "footer": { "text": "GitHub Actions" },
+                          "timestamp": "${{ github.event.head_commit.timestamp }}"
+                        }
+                        ${{
+                          env.FAILED != '0' && format(',{{"title": "❌ Failed Tests (Top 5)", "description": {0}, "color": 15158332 }}', env.FAILED_LIST) || ''
+                        }}
+                      ]
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "PR test notification"
