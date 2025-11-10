@@ -1,5 +1,6 @@
 import { ForbiddenError } from "@casl/ability";
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { MonthDayKey } from "src/constants/cache.constants";
 import { MonthDay } from "src/entities/monthDay.entity";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { AbilityFactory, Action } from "src/security/ability/ability.factory";
@@ -22,7 +23,7 @@ export class MonthDayService {
 
     async UpdateMonthDay(monthDay: MonthDay, dto: UpdateMonthDayDto) {
         monthDay.Update(dto);
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: MonthDayKey(monthDay.id) });
         return MonthDayDto.Map(monthDay);
     }
 

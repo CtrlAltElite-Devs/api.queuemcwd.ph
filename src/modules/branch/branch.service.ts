@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { BranchKey } from "src/constants/cache.constants";
 import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
-import { AbilityFactory } from "src/security/ability/ability.factory";
 import { createMonthDays } from "src/utils/generate-month-days.util";
 import { getCurrentMonthMetadata, getMonthMetadata } from "src/utils/get-current-month-data.util";
 import { UnitOfWork } from "../common/unit-of-work";
@@ -23,7 +23,6 @@ export class BranchService {
         private readonly monthDayRepository: MonthDayRepository,
         private readonly slotRepository: SlotsRepository,
         private readonly adminRepository: AdminRepository,
-        private readonly abilityFactory: AbilityFactory,
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
@@ -147,7 +146,9 @@ export class BranchService {
 
     async UpdateBranchAsync(branch: Branch, dto: UpdateBranchDto) {
         branch.Update(dto);
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({
+            invalidateKeys: BranchKey(branch.id),
+        });
         return branch;
     }
 }

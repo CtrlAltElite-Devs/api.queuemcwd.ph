@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import moment from "moment";
+import { SlotKey } from "src/constants/cache.constants";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
@@ -66,7 +67,7 @@ export class SlotsService {
         if (dto.limit !== undefined) slot.limit = dto.limit;
         if (dto.isActive !== undefined) slot.isActive = dto.isActive;
 
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(slot.id) });
         return SlotDto.Map(slot);
     }
 
@@ -113,7 +114,7 @@ export class SlotsService {
 
     async DeleteSlot(slot: Slot) {
         slot.SoftDelete();
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(slot.id) });
         return {
             message: `Slot: ${slot.id} was deleted`,
         };
