@@ -1,55 +1,43 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    ParseUUIDPipe,
-    Patch,
-    Post,
-    Req,
-} from "@nestjs/common";
-import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
-import { UseAdminOnlyGuard } from "src/security/decorators/index.decorators";
+import { Body, Controller, Delete, Get, Patch, Post } from "@nestjs/common";
+import { ApiParam, ApiTags } from "@nestjs/swagger";
+import { Slot } from "src/entities/slot.entity";
+import { UseAdminOnlyGuard, UseSlotGuard } from "src/security/decorators/index.decorators";
+import { CurrentAdmin } from "src/security/decorators/queried-entity-decorators/current-admin.decorator";
+import { SlotEntity } from "src/security/decorators/queried-entity-decorators/slot-entity.decorator";
+import { AdminDto } from "../admin/dto/admin.dto";
 import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
 import { SlotsService } from "./slots.service";
 
+@ApiTags("Slots")
 @Controller("slots")
 export class SlotsController {
     constructor(private readonly service: SlotsService) {}
 
     @Get("/:slotId")
-    @UseAdminOnlyGuard()
-    async GetSlot(
-        @Req() request: AuthenticatedRequest,
-        @Param("slotId", new ParseUUIDPipe()) slotId: string,
-    ) {
-        return await this.service.GetSlotByIdAsync(request.admin!, slotId);
+    @ApiParam({ name: "slotId", type: "string", format: "uuid", required: true })
+    @UseSlotGuard()
+    async getSlot(@SlotEntity() slot: Slot) {
+        return await this.service.GetSlotByIdAsync(slot);
     }
 
     @Patch("/:slotId")
-    @UseAdminOnlyGuard()
-    async update(
-        @Req() request: AuthenticatedRequest,
-        @Param("slotId", new ParseUUIDPipe()) slotId: string,
-        @Body() body: UpdateSlotDto,
-    ) {
-        return await this.service.UpdateSlotAsync(request.admin!, slotId, body);
+    @ApiParam({ name: "slotId", type: "string", format: "uuid", required: true })
+    @UseSlotGuard()
+    async update(@SlotEntity() slot: Slot, @Body() body: UpdateSlotDto) {
+        return await this.service.UpdateSlotAsync(slot, body);
+    }
+
+    @Delete("/:slotId")
+    @ApiParam({ name: "slotId", type: "string", format: "uuid", required: true })
+    @UseSlotGuard()
+    async delete(@SlotEntity() slot: Slot) {
+        return await this.service.DeleteSlot(slot);
     }
 
     @Post()
     @UseAdminOnlyGuard()
-    async create(@Req() request: AuthenticatedRequest, @Body() body: CreateSlotDto) {
-        return await this.service.CreateSlot(request.admin!, body);
-    }
-
-    @Delete("/:slotId")
-    @UseAdminOnlyGuard()
-    async delete(
-        @Req() request: AuthenticatedRequest,
-        @Param("slotId", new ParseUUIDPipe()) slotId: string,
-    ) {
-        return await this.service.DeleteSlot(request.admin!, slotId);
+    async create(@CurrentAdmin() admin: AdminDto, @Body() body: CreateSlotDto) {
+        return await this.service.CreateSlot(admin, body);
     }
 }

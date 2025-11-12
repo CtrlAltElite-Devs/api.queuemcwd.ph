@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { StartupJobRegistry } from "src/cron-jobs/startup-job-registry";
+import { AllExceptionsFilter } from "src/security/exception-filters/custom-global-exception.filter";
 import { env, resolvePort } from "./env/env.config";
 
 export default function ApplyConfigurations(app: INestApplication<any>) {
@@ -12,6 +13,7 @@ export default function ApplyConfigurations(app: INestApplication<any>) {
             transformOptions: { enableImplicitConversion: true },
         }),
     );
+    app.useGlobalFilters(new AllExceptionsFilter());
 }
 
 function exposeApiDocumentationInLogs() {

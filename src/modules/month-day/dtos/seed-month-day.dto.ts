@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsInt, IsPositive, Max, Min } from "class-validator";
 
@@ -19,4 +20,13 @@ export class SeedMonthDayDto {
     @IsPositive({ message: "year must be a positive number." })
     @Min(2000, { message: "year must be at least 2000." })
     year: number;
+
+    validateOrThrow() {
+        if (this.month < 1 || this.month > 12) {
+            throw new BadRequestException("Invalid month: must be between 1 and 12");
+        }
+        if (this.year < 1970 || this.year > 2100) {
+            throw new BadRequestException("Invalid year: must be between 1970 and 2100");
+        }
+    }
 }
