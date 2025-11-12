@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Req } from "@nestjs/common";
-import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import {
-    UseAuthenticationGuard,
+    UseAdminOnlyGuard,
     UseSuperAdminOnlyGuard,
 } from "src/security/decorators/index.decorators";
+import { CurrentAdmin } from "src/security/decorators/queried-entity-decorators/current-admin.decorator";
 import { AdminService } from "./admin.service";
+import { AdminDto } from "./dto/admin.dto";
 import { CreateAdminDto } from "./dto/create-admin.dto";
 import { AdminLoginDto } from "./dto/login-admin.dto";
 
@@ -24,8 +25,8 @@ export class AdminController {
     }
 
     @Get("me")
-    @UseAuthenticationGuard()
-    Me(@Req() request: AuthenticatedRequest) {
-        return request.admin;
+    @UseAdminOnlyGuard()
+    Me(@CurrentAdmin() admin: AdminDto) {
+        return admin;
     }
 }

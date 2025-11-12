@@ -1,19 +1,7 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    ParseUUIDPipe,
-    Patch,
-    Post,
-    Query,
-    Req,
-} from "@nestjs/common";
-import type { AuthenticatedRequest } from "src/security/common/authenticated.request";
-import {
-    UseAdminOnlyGuard,
-    UseSuperAdminOnlyGuard,
-} from "src/security/decorators/index.decorators";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
+import { Branch } from "src/entities/branch.entity";
+import { UseBranchGuard, UseSuperAdminOnlyGuard } from "src/security/decorators/index.decorators";
+import { BranchEntity } from "src/security/decorators/queried-entity-decorators/branch-entity.decorator";
 import { SeedMonthDayDto } from "../month-day/dtos/seed-month-day.dto";
 import { MonthDayResourceParameter } from "../month-day/resource-parameters/month-day.params";
 import { BranchService } from "./branch.service";
@@ -38,13 +26,9 @@ export class BranchController {
     }
 
     @Post("/:branchId/month-days/seed")
-    @UseAdminOnlyGuard()
-    async SeedMonthDaysForBranch(
-        @Req() request: AuthenticatedRequest,
-        @Param("branchId", new ParseUUIDPipe()) branchId: string,
-        @Body() body: SeedMonthDayDto,
-    ) {
-        return await this.branchService.SeedMonthDayForBranchAsync(branchId, request.admin!, body);
+    @UseBranchGuard()
+    async SeedMonthDaysForBranch(@BranchEntity() branch: Branch, @Body() body: SeedMonthDayDto) {
+        return await this.branchService.SeedMonthDayForBranchAsync(branch, body);
     }
 
     @Get("/:branchId/month-days/:monthDayId/slots")
@@ -62,12 +46,8 @@ export class BranchController {
     }
 
     @Patch("/:branchId")
-    @UseAdminOnlyGuard()
-    async UpdateBranch(
-        @Req() request: AuthenticatedRequest,
-        @Param("branchId", new ParseUUIDPipe()) branchId: string,
-        @Body() body: UpdateBranchDto,
-    ) {
-        return await this.branchService.UpdateBranchAsync(request.admin!, branchId, body);
+    @UseBranchGuard()
+    async UpdateBranch2(@BranchEntity() branch: Branch, @Body() dto: UpdateBranchDto) {
+        return await this.branchService.UpdateBranchAsync(branch, dto);
     }
 }
