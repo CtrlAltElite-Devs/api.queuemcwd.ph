@@ -1,16 +1,13 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import moment from "moment";
+import { SlotKey } from "src/constants/cache.constants";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { Slot } from "../../entities/slot.entity";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
+import { BranchAdminValidator } from "../common/validators/branch-admin.validator";
 import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
@@ -24,15 +21,10 @@ export class SlotsService {
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
-    async GetSlotByIdAsync(admin: AdminDto, slotId: string) {
-        const slot = await this.slotRepository.findOne(
-            { id: slotId },
-            { populate: ["appointments", "monthDay", "branch"] },
-        );
-        if (slot === null) throw new NotFoundException("slot not found");
-        if (slot.branch.id !== admin.branchId)
-            throw new UnauthorizedException("this admin is not assigned to the slot's branch");
-
+    async GetSlotByIdAsync(slot: Slot) {
+        await this.monthDayRepository
+            .getEntityManager()
+            .populate(slot, ["appointments", "monthDay"]);
         const dto = SlotDto.Map(slot);
         dto.booked = slot.appointments.filter(
             (a) => a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING,
@@ -41,16 +33,8 @@ export class SlotsService {
         return dto;
     }
 
-    async UpdateSlotAsync(admin: AdminDto, slotId: string, dto: UpdateSlotDto) {
-        const slot = await this.slotRepository.findOne(
-            { id: slotId },
-            { populate: ["branch", "monthDay"] },
-        );
-        if (!slot) throw new BadRequestException("Slot id not found");
-
-        if (admin.branchId !== slot.branch.id) {
-            throw new UnauthorizedException("Admin is not assigned to the slot's branch");
-        }
+    async UpdateSlotAsync(slot: Slot, dto: UpdateSlotDto) {
+        await this.monthDayRepository.getEntityManager().populate(slot, ["branch", "monthDay"]);
 
         SlotValidator.ValidateLimit(dto.limit);
 
@@ -64,7 +48,7 @@ export class SlotsService {
                 startTime: dto.startTime,
                 endTime: dto.endTime,
                 neighborSlots: neighborSlots,
-                currentSlotId: slotId,
+                currentSlotId: slot.id,
             });
 
             const baseDate = slot.monthDay.ConvertToMoment();
@@ -83,7 +67,7 @@ export class SlotsService {
         if (dto.limit !== undefined) slot.limit = dto.limit;
         if (dto.isActive !== undefined) slot.isActive = dto.isActive;
 
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(slot.id) });
         return SlotDto.Map(slot);
     }
 
@@ -97,9 +81,7 @@ export class SlotsService {
 
         if (monthDay === null) throw new NotFoundException("Month day not found");
 
-        if (monthDay.branch.id !== admin.branchId) {
-            throw new UnauthorizedException("Admin is not assigned to this branch");
-        }
+        BranchAdminValidator.EnsureIsAssignedToBranch(admin, monthDay.branch);
 
         SlotValidator.ValidateLimit(dto.limit);
 
@@ -130,23 +112,9 @@ export class SlotsService {
         return SlotDto.Map(newSlot);
     }
 
-    async DeleteSlot(admin: AdminDto, slotId: string) {
-        const slot = await this.slotRepository.findOne(
-            {
-                id: slotId,
-            },
-            { populate: ["branch"] },
-        );
-
-        if (slot === null) throw new NotFoundException("Slot not found");
-
-        if (slot.branch.id !== admin.branchId)
-            throw new UnauthorizedException("Admin is not under this branch");
-
+    async DeleteSlot(slot: Slot) {
         slot.SoftDelete();
-
-        await this.unitOfWork.Commit();
-
+        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(slot.id) });
         return {
             message: `Slot: ${slot.id} was deleted`,
         };

@@ -1,9 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Appointment } from "src/entities/appointment.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
-import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
 import { AppointmentDto } from "./dtos/appointment.dto";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
@@ -48,23 +47,11 @@ export class AppointmentService {
         return AppointmentDto.Map(appointment);
     }
 
-    async UpdateAppointmentStatusAsync(
-        admin: AdminDto,
-        appointmentId: string,
+    async UpdateAppointmentAsync(
+        appointment: Appointment,
         newStatus: QueueStatus,
     ): Promise<AppointmentDto> {
-        const appointment = await this.appointmentRepository.findOne(
-            { id: appointmentId },
-            { populate: ["slot", "branch"] },
-        );
-
-        if (appointment === null) {
-            throw new BadRequestException("Appointment ID not found");
-        }
-
-        if (appointment.branch.id !== admin.branchId) {
-            throw new UnauthorizedException("admin cannot update appointment from another branch");
-        }
+        await this.appointmentRepository.getEntityManager().populate(appointment, ["slot"]);
 
         const now = new Date();
 

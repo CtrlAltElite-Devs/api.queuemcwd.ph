@@ -1,10 +1,5 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from "@nestjs/common";
-import { AdminRole } from "src/entities/admin.entity";
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { BranchKey } from "src/constants/cache.constants";
 import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
@@ -12,7 +7,6 @@ import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { createMonthDays } from "src/utils/generate-month-days.util";
 import { getCurrentMonthMetadata, getMonthMetadata } from "src/utils/get-current-month-data.util";
-import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
 import { MonthDayDto } from "../month-day/dtos/month-day.dto";
 import { SeedMonthDayDto } from "../month-day/dtos/seed-month-day.dto";
@@ -123,22 +117,8 @@ export class BranchService {
         });
     }
 
-    async SeedMonthDayForBranchAsync(branchId: string, admin: AdminDto, dto: SeedMonthDayDto) {
-        if (dto.month < 1 || dto.month > 12) {
-            throw new BadRequestException("Invalid month: must be between 1 and 12");
-        }
-        if (dto.year < 1970 || dto.year > 2100) {
-            throw new BadRequestException("Invalid year: must be between 1970 and 2100");
-        }
-
-        const branch = await this.branchRepository.findOne({ id: branchId });
-        if (!branch) {
-            throw new BadRequestException("Branch not found");
-        }
-
-        if (admin.branchId !== branch.id) {
-            throw new UnauthorizedException("admin is not assigned to this branch");
-        }
+    async SeedMonthDayForBranchAsync(branch: Branch, dto: SeedMonthDayDto) {
+        dto.validateOrThrow();
 
         const monthMetaData = getMonthMetadata(dto.month, dto.year);
 
@@ -164,21 +144,11 @@ export class BranchService {
         };
     }
 
-    async UpdateBranchAsync(admin: AdminDto, branchId: string, dto: UpdateBranchDto) {
-        const branch = await this.branchRepository.findOne(
-            {
-                id: branchId,
-            },
-            { populate: ["admins"] },
-        );
-        if (branch === null) throw new NotFoundException("Branch not found");
-        if (admin.role !== AdminRole.SUPER_ADMIN) {
-            if (admin.branchId !== branch.id) {
-                throw new UnauthorizedException("Admin is not assigned to this branch");
-            }
-        }
+    async UpdateBranchAsync(branch: Branch, dto: UpdateBranchDto) {
         branch.Update(dto);
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({
+            invalidateKeys: BranchKey(branch.id),
+        });
         return branch;
     }
 }
