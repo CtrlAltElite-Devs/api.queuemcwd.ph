@@ -27,6 +27,7 @@
         ]
     },
     "dependencies": {
+        "@casl/ability": "^6.7.3",
         "@mikro-orm/cli": "^6.5.9",
         "@mikro-orm/core": "^6.5.9",
         "@mikro-orm/migrations": "^6.5.9",
