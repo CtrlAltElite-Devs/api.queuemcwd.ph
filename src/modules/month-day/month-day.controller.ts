@@ -34,6 +34,12 @@ export class MonthDayController {
         return await this.service.EditSlotsForMonthDay(monthDay, body);
     }
 
+    @Get("/:monthDayId/slots")
+    @UseMonthDayGuard()
+    async getSlots(@MonthDayEntity() monthDay: MonthDay) {
+        return await this.service.GetSlotsForMonthday(monthDay);
+    }
+
     @Get("/:monthDayId/appointments")
     @UseAdminOnlyGuard()
     async getAppointmentsFromMonthDay(

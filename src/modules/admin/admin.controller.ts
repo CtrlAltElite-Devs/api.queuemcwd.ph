@@ -27,6 +27,6 @@ export class AdminController {
     @Get("me")
     @UseAdminOnlyGuard()
     Me(@CurrentAdmin() admin: AdminDto) {
-        return admin;
+        return this.adminService.Me(admin);
     }
 }

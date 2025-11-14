@@ -2,6 +2,7 @@ import { ForbiddenError } from "@casl/ability";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { MonthDayKey } from "src/constants/cache.constants";
 import { MonthDay } from "src/entities/monthDay.entity";
+import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { AbilityFactory, Action } from "src/security/ability/ability.factory";
 import { generateSlotsForMonthDay } from "src/utils/generate-month-days.util";
@@ -18,6 +19,7 @@ export class MonthDayService {
     constructor(
         private readonly slotRepository: SlotsRepository,
         private readonly abilityFactory: AbilityFactory,
+        private readonly monthDayRepository: MonthDayRepository,
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
@@ -64,5 +66,11 @@ export class MonthDayService {
 
         const appointments = slots.flatMap((s) => s.appointments.getItems());
         return appointments.map((a) => AppointmentDto.Map(a));
+    }
+
+    async GetSlotsForMonthday(monthDay: MonthDay) {
+        await this.monthDayRepository.getEntityManager().populate(monthDay, ["slots"]);
+        const slots = monthDay.slots;
+        return slots.map((s) => SlotDto.Map(s));
     }
 }

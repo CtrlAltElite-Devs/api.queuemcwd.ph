@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { env } from "src/configurations/env/env.config";
 import { AdminCacheTTL, AdminKey } from "src/constants/cache.constants";
@@ -106,16 +111,12 @@ export class AdminService {
         return AdminDto.Map(admin);
     }
 
-    async Me(adminId: string) {
-        const admin = await this.adminRepository.findOne(
-            {
-                id: adminId,
-            },
-            { populate: ["branch"] },
-        );
+    async Me(admin: AdminDto) {
+        const retrievedAdmin = await this.adminRepository.findOne({
+            id: admin.id,
+        });
 
-        if (admin !== null) throw new UnauthorizedException("admin not found");
-
-        return admin;
+        if (retrievedAdmin === null) throw new NotFoundException();
+        return AdminDto.Map(retrievedAdmin);
     }
 }
