@@ -33,7 +33,7 @@ export const InfrastructureModules = [
         global: true,
         secret: jwtEnv.JWT_SECRET,
         signOptions: {
-            expiresIn: "300s",
+            expiresIn: "5m",
         },
     }),
     CacheModule.register({
