@@ -35,10 +35,6 @@ function isInExcludedTime(currentTime: moment.Moment, excludeTimes: TimeRange[])
     return excludeTimes.some((range) => hour >= range.startHour && hour < range.endHour);
 }
 
-/**
- * Creates an array of MonthDay entities populated with slot entities,
- * allowing dynamic options and time exclusions.
- */
 export function createMonthDays(
     branch: Branch,
     monthMetadata: MonthMetaData,
@@ -59,8 +55,8 @@ export function createMonthDays(
         monthDay.day = day;
         monthDay.branch = branch;
 
-        // Determine day of week
-        const dayMoment = moment({ year, month: month - 1, day });
+        // Determine day of week (UTC)
+        const dayMoment = moment.utc({ year, month: month - 1, day });
         const dayOfWeekString = dayMoment.format("dddd");
         const dayOfWeek = DaysOfWeek[dayOfWeekString.toUpperCase() as keyof typeof DaysOfWeek];
         monthDay.dayofWeek = dayOfWeek;
@@ -70,12 +66,11 @@ export function createMonthDays(
 
         const slots: Slot[] = [];
 
-        // Generate time slots
-        const currentTime = moment({ year, month: month - 1, day, hour: startHour, minute: 0 });
-        const endBoundary = moment({ year, month: month - 1, day, hour: endHour, minute: 0 });
+        // Generate time slots (UTC)
+        const currentTime = moment.utc({ year, month: month - 1, day, hour: startHour, minute: 0 });
+        const endBoundary = moment.utc({ year, month: month - 1, day, hour: endHour, minute: 0 });
 
         while (currentTime.isBefore(endBoundary) || currentTime.isSame(endBoundary)) {
-            // Skip excluded times
             if (!isInExcludedTime(currentTime, excludeTimes)) {
                 const slot = new Slot();
                 const startTime = currentTime.clone();
@@ -86,9 +81,8 @@ export function createMonthDays(
                 slot.monthDay = monthDay;
                 slot.branch = branch;
 
-                // Deactivate past slots automatically
-                const now = moment();
-                slot.isActive = endTime.isAfter(now);
+                // Deactivate past slots automatically (UTC)
+                slot.isActive = endTime.isAfter(moment.utc());
 
                 slots.push(slot);
             }
@@ -107,10 +101,6 @@ export function createMonthDays(
     return monthDays;
 }
 
-/**
- * Generates slot entities for a specific MonthDay.
- * Attaches each slot to the given MonthDay and its branch automatically.
- */
 export function generateSlotsForMonthDay(
     monthDay: MonthDay,
     options: CreateMonthDayOptions = {},
@@ -123,8 +113,8 @@ export function generateSlotsForMonthDay(
     const { year, month, day, branch } = monthDay;
     const slots: Slot[] = [];
 
-    const currentTime = moment({ year, month: month - 1, day, hour: startHour, minute: 0 });
-    const endBoundary = moment({ year, month: month - 1, day, hour: endHour, minute: 0 });
+    const currentTime = moment.utc({ year, month: month - 1, day, hour: startHour, minute: 0 });
+    const endBoundary = moment.utc({ year, month: month - 1, day, hour: endHour, minute: 0 });
 
     while (currentTime.isBefore(endBoundary) || currentTime.isSame(endBoundary)) {
         if (!isInExcludedTime(currentTime, excludeTimes)) {
@@ -136,7 +126,7 @@ export function generateSlotsForMonthDay(
             slot.endTime = endTime.toDate();
             slot.monthDay = monthDay;
             slot.branch = branch;
-            slot.isActive = endTime.isAfter(moment()); // automatically deactivate past slots
+            slot.isActive = endTime.isAfter(moment.utc());
 
             slots.push(slot);
         }
@@ -144,8 +134,6 @@ export function generateSlotsForMonthDay(
         currentTime.add(incrementMinutes, "minutes");
     }
 
-    // If you’re using MikroORM’s Collection
     monthDay.slots.add(slots);
-
     return slots;
 }
