@@ -112,9 +112,14 @@ export class AdminService {
     }
 
     async Me(admin: AdminDto) {
-        const retrievedAdmin = await this.adminRepository.findOne({
-            id: admin.id,
-        });
+        const retrievedAdmin = await this.adminRepository.findOne(
+            {
+                id: admin.id,
+            },
+            {
+                populate: ["branch"],
+            },
+        );
 
         if (retrievedAdmin === null) throw new NotFoundException();
         return AdminDto.Map(retrievedAdmin);
