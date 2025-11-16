@@ -42,6 +42,9 @@ export class MonthDay extends CustomBaseEntity {
     @ManyToOne(() => Branch)
     branch: Branch;
 
+    @Property({ nullable: true })
+    additionalNotes?: string;
+
     ToggleIsWorkingDay() {
         this.isWorkingDay = !this.isWorkingDay;
     }
@@ -53,6 +56,10 @@ export class MonthDay extends CustomBaseEntity {
     Update(dto: UpdateMonthDayDto) {
         if (dto.isWorkingDay !== undefined) {
             this.isWorkingDay = dto.isWorkingDay;
+        }
+
+        if (dto.additionalNotes !== undefined) {
+            this.additionalNotes = dto.additionalNotes;
         }
     }
 }
