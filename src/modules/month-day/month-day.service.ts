@@ -12,6 +12,7 @@ import { SlotDto } from "../slots/dtos/slot.dto";
 import { BatchUpdateMonthDaySlotsDto } from "./dtos/batch-update/batch-update-month-day-slots.dto";
 import { MonthDayDto } from "./dtos/month-day.dto";
 import { UpdateMonthDayDto } from "./dtos/update-month-day.dto";
+import { Slot } from "src/entities/slot.entity";
 
 @Injectable()
 export class MonthDayService {
@@ -48,7 +49,7 @@ export class MonthDayService {
     }
 
     async GetAppointmentsFromMonthday(admin: AdminDto, monthDayId: string) {
-        const slots = await this.slotRepository.findAll({
+        const slots: Slot[] = await this.slotRepository.findAll({
             where: {
                 monthDay: {
                     id: monthDayId,

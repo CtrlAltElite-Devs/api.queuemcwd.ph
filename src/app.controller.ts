@@ -25,8 +25,8 @@ export class AppController {
         return "protected for super";
     }
 
-    @Get("new-endpoint")
-    getNewEndpoint(): string {
-        return "new endpoint from ci/cd";
+    @Get("test-pre-commit")
+    testPrecommit() {
+        return "formatted precommit";
     }
 }
