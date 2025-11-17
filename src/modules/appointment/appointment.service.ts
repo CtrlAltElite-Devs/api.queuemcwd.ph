@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { SlotKey } from "src/constants/cache.constants";
 import { Appointment } from "src/entities/appointment.entity";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
@@ -29,7 +30,7 @@ export class AppointmentService {
 
         const newAppointment = Appointment.Create(appointmentCode, slot!, dto);
         this.appointmentRepository.create(newAppointment);
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(dto.slotId) });
         return AppointmentDto.Map(newAppointment);
     }
 
