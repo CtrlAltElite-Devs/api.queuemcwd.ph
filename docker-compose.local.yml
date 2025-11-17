@@ -1,10 +1,50 @@
+version: "3.9"
+
 services:
     api:
         build:
             context: .
             dockerfile: Dockerfile
-        image: queuemcwd-api
+        container_name: queuemcwd-api
         ports:
             - "5000:5000"
         env_file:
             - .env.test
+        depends_on:
+            - redis
+            - mysql
+        networks:
+            - mcwd-network
+
+    redis:
+        image: redis:7
+        container_name: mcwd-redis
+        ports:
+            - "6379:6379"
+        command: ["redis-server", "--appendonly", "yes"]
+        volumes:
+            - redis_data:/data
+        networks:
+            - mcwd-network
+
+    mysql:
+        image: mysql:8.1
+        container_name: mcwd-mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:-mcwd_db}
+            MYSQL_USER: ${MYSQL_USER:-mcwd}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mcwd}
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - mcwd-network
+
+volumes:
+    redis_data:
+    mysql_data:
+
+networks:
+    mcwd-network: {}
