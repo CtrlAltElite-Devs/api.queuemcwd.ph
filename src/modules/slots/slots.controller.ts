@@ -17,8 +17,8 @@ export class SlotsController {
     @Get("/:slotId")
     @ApiParam({ name: "slotId", type: "string", format: "uuid", required: true })
     @UseSlotGuard()
-    async getSlot(@SlotEntity() slot: Slot) {
-        return await this.service.GetSlotByIdAsync(slot);
+    getSlot(@SlotEntity() slot: Slot) {
+        return this.service.GetSlotByIdAsync(slot);
     }
 
     @Patch("/:slotId")

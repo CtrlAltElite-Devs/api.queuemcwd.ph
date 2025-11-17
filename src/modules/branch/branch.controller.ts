@@ -1,3 +1,4 @@
+import { CacheTTL } from "@nestjs/cache-manager";
 import {
     Body,
     Controller,
@@ -7,9 +8,12 @@ import {
     Patch,
     Post,
     Query,
+    UseInterceptors,
     Version,
 } from "@nestjs/common";
+import { BranchDataCacheTTL } from "src/constants/cache.constants";
 import { Branch } from "src/entities/branch.entity";
+import { DynamicCacheInterceptor } from "src/interceptors/dynamic-cache-interceptor";
 import { UseBranchGuard, UseSuperAdminOnlyGuard } from "src/security/decorators/index.decorators";
 import { BranchEntity } from "src/security/decorators/queried-entity-decorators/branch-entity.decorator";
 import { SeedMonthDayDto } from "../month-day/dtos/seed-month-day.dto";
@@ -28,6 +32,8 @@ export class BranchController {
     }
 
     @Get("/:branchId/month-days")
+    @UseInterceptors(DynamicCacheInterceptor)
+    @CacheTTL(BranchDataCacheTTL)
     async GetAllMonthDaysForBranch(
         @Param("branchId", new ParseUUIDPipe()) branchId: string,
         @Query() params: MonthDayResourceParameter,
@@ -42,6 +48,8 @@ export class BranchController {
     }
 
     @Get("/:branchId/month-days/:monthDayId/slots")
+    @UseInterceptors(DynamicCacheInterceptor)
+    @CacheTTL(BranchDataCacheTTL)
     async GetAllSlotsForMonthDayBranch(
         @Param("branchId", new ParseUUIDPipe()) branchId: string,
         @Param("monthDayId", new ParseUUIDPipe()) monthDayId: string,
@@ -51,6 +59,8 @@ export class BranchController {
 
     @Get("/:branchId/month-days/:monthDayId/slots")
     @Version("2")
+    @UseInterceptors(DynamicCacheInterceptor)
+    @CacheTTL(BranchDataCacheTTL)
     async GetAllSlotsForMonthDayBranchV2(
         @Param("branchId", new ParseUUIDPipe()) branchId: string,
         @Param("monthDayId", new ParseUUIDPipe()) monthDayId: string,

@@ -24,9 +24,4 @@ export class AppController {
     getProtectedForSuper(): string {
         return "protected for super";
     }
-
-    @Get("test-pre-commit")
-    testPrecommit() {
-        return "formatted precommit";
-    }
 }
