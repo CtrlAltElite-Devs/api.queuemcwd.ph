@@ -8,7 +8,7 @@ import InitializeDatabase from "./configurations/database-initializer.config";
 import { resolvePort } from "./configurations/env/env.config";
 import UseApiDocumentations from "./configurations/open-api.config";
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
     const app = await NestFactory.create(AppModule, {
         logger: new ConsoleLogger({
             prefix: "MCWD",
