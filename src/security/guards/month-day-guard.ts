@@ -45,7 +45,7 @@ export class MonthDayGuard implements CanActivate {
         let monthDay: MonthDay | null;
 
         if (isReadonly) {
-            monthDay = await this.cacheService.GetOrCreateWithLock(MonthDayKey(monthDayId), {
+            monthDay = await this.cacheService.GetOrCreate(MonthDayKey(monthDayId), {
                 getFunc: () => this.LoadFromDb(monthDayId),
                 ttl: MonthDayTTL,
             });

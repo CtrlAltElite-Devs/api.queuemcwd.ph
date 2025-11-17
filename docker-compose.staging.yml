@@ -1,15 +1,53 @@
+version: "3.9"
+
 services:
+    mysql:
+        image: mysql:8.1
+        container_name: mcwd-mysql-staging
+        env_file:
+            - .env
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        volumes:
+            - mysql_data-staging:/var/lib/mysql
+        networks:
+            - mcwd-staging-network
+
+    redis:
+        image: redis:7
+        container_name: mcwd-redis-staging
+        command: ["redis-server", "--appendonly", "yes"]
+        volumes:
+            - redis_data-staging:/data
+        networks:
+            - mcwd-staging-network
+
     api:
         container_name: mcwd-api-staging
-        image: ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: queuemcwd-api:staging
         ports:
             - "5001:5001"
         env_file:
             - .env
         environment:
             - NODE_ENV=development
+        depends_on:
+            - mysql
+            - redis
         networks:
-            - mcwd-network-staging
+            - mcwd-staging-network
+
+        entrypoint: ["/usr/src/app/start.sh"]
+
+volumes:
+    mysql_data-staging:
+    redis_data-staging:
+
 networks:
-    mcwd-network-staging:
-        external: true
+    mcwd-staging-network: {}

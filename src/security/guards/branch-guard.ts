@@ -47,7 +47,7 @@ export class BranchGuard implements CanActivate {
         let branch: Branch | null;
 
         if (isReadonly) {
-            branch = await this.cacheService.GetOrCreateWithLock(BranchKey(branchId), {
+            branch = await this.cacheService.GetOrCreate(BranchKey(branchId), {
                 getFunc: () => this.LoadFromDb(branchId),
                 ttl: BranchCacheTTL,
             });
