@@ -5,7 +5,7 @@ import { CustomJwtService } from "./custom-jwt-service";
 import { UnitOfWork } from "./unit-of-work";
 
 @Module({
-    providers: [UnitOfWork, CustomJwtService, CacheService, AbilityFactory],
-    exports: [UnitOfWork, CustomJwtService, CacheService, AbilityFactory],
+    providers: [UnitOfWork, CustomJwtService, AbilityFactory, CacheService],
+    exports: [UnitOfWork, CustomJwtService, AbilityFactory, CacheService],
 })
 export class CommonModule {}
