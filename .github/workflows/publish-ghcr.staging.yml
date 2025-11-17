@@ -82,18 +82,11 @@ jobs:
 
                       SHA_TAG=$(git rev-parse HEAD)
 
-                      # Log in to GHCR on VPS
-                      echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u "${{ secrets.GH_USERNAME }}" --password-stdin
-
-                      # Pull latest staging image
-                      docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:staging
-                      docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
-
                       # 🚀 Stop old containers before starting new ones
-                      docker compose -p staging -f docker-compose.staging.yml down
+                      docker compose -p mcwd-staging -f docker-compose.staging.yml down
 
                       # 🆕 Start new containers
-                      docker compose -p staging -f docker-compose.staging.yml up -d
+                      docker compose -p mcwd-staging -f docker-compose.staging.yml up -d
 
             # if deployment failed
             - name: Failed Deployment to staging notification

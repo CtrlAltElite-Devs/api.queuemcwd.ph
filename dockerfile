@@ -34,7 +34,7 @@ RUN find node_modules -type d -name "test" -o -name "__tests__" -exec rm -rf {} 
 # ==============================
 # 3️⃣ Runtime Stage (distroless)
 # ==============================
-FROM gcr.io/distroless/nodejs24
+FROM node:24-bullseye-slim
 
 WORKDIR /app
 
@@ -44,8 +44,12 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 # Copy built dist folder
 COPY --from=builder /app/dist ./dist
 
-# Run as non-root user
-USER nonroot
+# Copy wait-for script into container
+COPY wait-for.sh /usr/src/app/wait-for.sh
+RUN chmod +x /usr/src/app/wait-for.sh
+
+COPY start.sh /usr/src/app/start.sh
+RUN chmod +x /usr/src/app/start.sh
 
 # Entry point
-CMD ["dist/src/main.js"]
+CMD ["/usr/src/app/wait-for.sh", "mysql:3306", "--", "node", "dist/src/main.js"]

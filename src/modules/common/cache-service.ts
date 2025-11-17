@@ -1,6 +1,7 @@
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { Cache } from "cache-manager";
+import { RedisService } from "./redis-service";
 
 export type GetOrCreateOptions<T> = {
     getFunc: () => Promise<T>;
@@ -10,41 +11,14 @@ export type GetOrCreateOptions<T> = {
 @Injectable()
 export class CacheService {
     private readonly logger = new Logger(CacheService.name);
-    private pending = new Map<string, Promise<unknown>>();
 
-    constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
+    constructor(
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+        private readonly redisService: RedisService,
+    ) {}
 
-    async GetOrCreateWithLock<T>(key: string, options: GetOrCreateOptions<T>): Promise<T> {
-        const cached = await this.cacheManager.get<T>(key);
-
-        if (cached !== undefined) {
-            this.logger.debug(`Cache hit for key: ${key}`);
-            return cached;
-        }
-
-        this.logger.debug(`Cache miss for key: ${key}`);
-
-        if (this.pending.has(key)) {
-            this.logger.debug(`Awaiting pending fetch for key: ${key}`);
-            return this.pending.get(key)! as Promise<T>;
-        }
-
-        const promise = options
-            .getFunc()
-            .then(async (value) => {
-                this.logger.debug(`Fetched and caching value for key: ${key}`);
-                await this.cacheManager.set(key, value, options.ttl);
-                this.pending.delete(key);
-                return value;
-            })
-            .catch((err: Error) => {
-                this.logger.error(`Error fetching value for key: $  {key}`, err.stack || err);
-                this.pending.delete(key);
-                throw err;
-            });
-
-        this.pending.set(key, promise);
-        return promise;
+    async GetOrCreate<T>(key: string, options: GetOrCreateOptions<T>): Promise<T> {
+        return await this.redisService.getOrCreate<T>(key, options.getFunc, options.ttl);
     }
 
     async Get<T>(key: string): Promise<T | undefined> {
@@ -58,9 +32,19 @@ export class CacheService {
         this.logger.debug(`Set cache for key: ${key} (ttl: ${ttl ?? "default"})`);
     }
 
-    async Delete(key: string): Promise<void> {
-        await this.cacheManager.del(key);
-        this.logger.debug(`Deleted cache for key: ${key}`);
+    async Delete(key: string | string[]): Promise<void> {
+        if (Array.isArray(key)) {
+            for (const k of key) await this.Delete(k);
+            return;
+        }
+
+        // If using Redis, allow wildcards
+        if (key.includes("*")) {
+            await this.redisService.invalidateByPattern(key);
+        } else {
+            await this.cacheManager.del(key);
+            this.logger.debug(`Deleted cache for key: ${key}`);
+        }
     }
 
     async Clear(): Promise<void> {
