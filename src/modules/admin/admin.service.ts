@@ -87,7 +87,7 @@ export class AdminService {
     }
 
     async GetAdminByIdForGuard(adminId: string) {
-        return await this.cacheService.GetOrCreateWithLock(AdminKey(adminId), {
+        return await this.cacheService.GetOrCreate(AdminKey(adminId), {
             getFunc: () => this.RetrieveAdminDto(adminId),
             ttl: AdminCacheTTL,
         });

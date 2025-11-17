@@ -1,6 +1,9 @@
 services:
     api:
-        image: queuemcwd-api:latest
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: queuemcwd-api
         ports:
             - "5000:5000"
         env_file:

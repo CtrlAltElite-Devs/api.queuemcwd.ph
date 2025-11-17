@@ -3,6 +3,7 @@ import z from "zod";
 import { adminEnvSchema } from "./admin.env";
 import { databaseEnvSchema } from "./database.env";
 import { jwtEnvSchema } from "./jwt.env";
+import { redisEnvSchema } from "./redis.env";
 import { serverEnvSchema } from "./server.env";
 
 // Combine schemas
@@ -11,6 +12,7 @@ export const envSchema = z.object({
     ...serverEnvSchema.shape,
     ...adminEnvSchema.shape,
     ...jwtEnvSchema.shape,
+    ...redisEnvSchema.shape,
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -21,10 +21,7 @@ export class SlotsService {
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
-    async GetSlotByIdAsync(slot: Slot) {
-        await this.monthDayRepository
-            .getEntityManager()
-            .populate(slot, ["appointments", "monthDay"]);
+    GetSlotByIdAsync(slot: Slot) {
         const dto = SlotDto.Map(slot);
         dto.booked = slot.appointments.filter(
             (a) => a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING,
