@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    ParseUUIDPipe,
+    Patch,
+    Post,
+    Query,
+    Version,
+} from "@nestjs/common";
 import { Branch } from "src/entities/branch.entity";
 import { UseBranchGuard, UseSuperAdminOnlyGuard } from "src/security/decorators/index.decorators";
 import { BranchEntity } from "src/security/decorators/queried-entity-decorators/branch-entity.decorator";
@@ -37,6 +47,15 @@ export class BranchController {
         @Param("monthDayId", new ParseUUIDPipe()) monthDayId: string,
     ) {
         return await this.branchService.GetMonthDaySlots(branchId, monthDayId);
+    }
+
+    @Get("/:branchId/month-days/:monthDayId/slots")
+    @Version("2")
+    async GetAllSlotsForMonthDayBranchV2(
+        @Param("branchId", new ParseUUIDPipe()) branchId: string,
+        @Param("monthDayId", new ParseUUIDPipe()) monthDayId: string,
+    ) {
+        return await this.branchService.GetMonthDaySlotsV2(branchId, monthDayId);
     }
 
     @Post()

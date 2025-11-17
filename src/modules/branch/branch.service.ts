@@ -15,6 +15,7 @@ import { SlotDto } from "../slots/dtos/slot.dto";
 import { BranchDto } from "./dto/branch.dto";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
+import { SlotDtosResponse } from "../slots/dtos/slot-dtos-response";
 
 @Injectable()
 export class BranchService {
@@ -104,6 +105,42 @@ export class BranchService {
             dto.booked = slot.ComputeBooked();
             return dto;
         });
+    }
+
+    async GetMonthDaySlotsV2(branchId: string, monthDayId: string) {
+        const monthDay = await this.monthDayRepository.findOne(
+            { id: monthDayId },
+            { fields: ["id", "isWorkingDay", "additionalNotes", "month", "year", "day"] },
+        );
+
+        if (monthDay === null) {
+            throw new BadRequestException("Month Day ID not found");
+        }
+
+        if (!monthDay.isWorkingDay) {
+            const message =
+                monthDay.additionalNotes ??
+                `${monthDay.ConvertToMoment().format("MMMM Do, YYYY")} is a non working day`;
+            return SlotDtosResponse.Map([], message);
+        }
+
+        const slots = await this.slotRepository.findAll({
+            where: {
+                monthDay: { id: monthDayId },
+                branch: { id: branchId },
+            },
+            orderBy: { startTime: "ASC" },
+            populate: ["appointments", "branch", "monthDay"],
+        });
+
+        const slotDtos = slots.map((slot) => {
+            const dto = SlotDto.Map(slot);
+            dto.dayId = monthDayId;
+            dto.booked = slot.ComputeBooked();
+            return dto;
+        });
+
+        return SlotDtosResponse.Map(slotDtos, monthDay.additionalNotes);
     }
 
     async GetMonthDaysForBranchAsync(branchId: string, params: MonthDayResourceParameter) {
