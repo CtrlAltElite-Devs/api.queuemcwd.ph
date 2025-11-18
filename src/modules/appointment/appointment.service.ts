@@ -30,7 +30,9 @@ export class AppointmentService {
 
         const newAppointment = Appointment.Create(appointmentCode, slot!, dto);
         this.appointmentRepository.create(newAppointment);
-        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(dto.slotId) });
+        await this.unitOfWork.Commit({
+            invalidateKeys: [SlotKey(dto.slotId)],
+        });
         return AppointmentDto.Map(newAppointment);
     }
 

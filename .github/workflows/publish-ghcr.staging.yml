@@ -85,6 +85,9 @@ jobs:
                       # 🚀 Stop old containers before starting new ones
                       docker compose -p mcwd-staging -f docker-compose.staging.yml down
 
+                      # Build the image with no cache
+                      docker compose -p mcwd-staging -f docker-compose.staging.yml build --no-cache
+
                       # 🆕 Start new containers
                       docker compose -p mcwd-staging -f docker-compose.staging.yml up -d
 
