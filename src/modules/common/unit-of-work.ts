@@ -24,6 +24,7 @@ export class UnitOfWork {
 
             // ✅ Handle cache invalidation
             if (options?.invalidateKeys) {
+                this.logger.debug(`Processing cache invalidation...`);
                 const inputKeys = Array.isArray(options.invalidateKeys)
                     ? options.invalidateKeys
                     : [options.invalidateKeys];
@@ -34,7 +35,7 @@ export class UnitOfWork {
                     await this.cacheService.Delete(key);
                 }
 
-                this.logger.debug(
+                this.logger.log(
                     `Invalidated ${keysToInvalidate.length} cache entr${keysToInvalidate.length > 1 ? "ies" : "y"} after commit`,
                 );
             }
