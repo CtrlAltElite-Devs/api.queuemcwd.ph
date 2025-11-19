@@ -52,7 +52,6 @@ export class AdminService {
         let hashedPassword = "";
 
         if (dto.password === undefined) {
-            console.log("default admin passwod", env.ADMIN_DEFAULT_PASSWORD);
             hashedPassword = await bcrypt.hash(env.ADMIN_DEFAULT_PASSWORD, saltRounds);
         } else {
             hashedPassword = await bcrypt.hash(dto.password, saltRounds);
