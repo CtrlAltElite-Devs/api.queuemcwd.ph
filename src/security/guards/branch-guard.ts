@@ -26,17 +26,29 @@ export class BranchGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest<EnrichedRequest>();
-        const branchId = request.params?.branchId;
-        const admin = request.admin;
 
+        const admin = request.admin;
         if (!admin) {
             throw new UnauthorizedException();
         }
 
-        if (!branchId) {
-            throw new BadRequestException("branchId param is missing");
+        const paramBranchId = request.params?.branchId;
+        const queryBranchId = request.query?.branchId as string;
+
+        // must not contain both
+        if (paramBranchId && queryBranchId) {
+            throw new BadRequestException(
+                "branchId should be provided either in the path or query, not both",
+            );
         }
 
+        // must contain at least one
+        const branchId = paramBranchId || queryBranchId;
+        if (!branchId) {
+            throw new BadRequestException("branchId is required (path or query)");
+        }
+
+        // validate UUID
         if (!isUUID(branchId)) {
             throw new BadRequestException("branchId must be a valid UUID");
         }
@@ -47,7 +59,7 @@ export class BranchGuard implements CanActivate {
         let branch: Branch | null;
 
         if (isReadonly) {
-            branch = await this.cacheService.GetOrCreateWithLock(BranchKey(branchId), {
+            branch = await this.cacheService.GetOrCreate(BranchKey(branchId), {
                 getFunc: () => this.LoadFromDb(branchId),
                 ttl: BranchCacheTTL,
             });
@@ -55,9 +67,13 @@ export class BranchGuard implements CanActivate {
             branch = await this.LoadFromDb(branchId);
         }
 
-        if (branch === null) throw new NotFoundException("Branch not found");
+        if (branch === null) {
+            throw new NotFoundException("Branch not found");
+        }
+
         const adminAbility = this.abilityFactory.defineAbilityForAdmin(admin);
         ForbiddenError.from(adminAbility).throwUnlessCan(Action.Manage, branch);
+
         request.branch = branch;
         return true;
     }

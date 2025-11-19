@@ -45,7 +45,7 @@ export class SlotGuard implements CanActivate {
         let slot: Slot | null;
 
         if (isReadonly) {
-            slot = await this.cacheService.GetOrCreateWithLock(SlotKey(slotId), {
+            slot = await this.cacheService.GetOrCreate(SlotKey(slotId), {
                 getFunc: () => this.LoadFromDB(slotId),
                 ttl: SlotTTL,
             });
@@ -66,7 +66,7 @@ export class SlotGuard implements CanActivate {
             {
                 id: slotId,
             },
-            { populate: ["branch"] },
+            { populate: ["appointments", "monthDay", "branch"] },
         );
     }
 }

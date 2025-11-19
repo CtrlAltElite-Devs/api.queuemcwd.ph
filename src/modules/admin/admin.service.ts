@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { env } from "src/configurations/env/env.config";
 import { AdminCacheTTL, AdminKey } from "src/constants/cache.constants";
@@ -47,7 +52,6 @@ export class AdminService {
         let hashedPassword = "";
 
         if (dto.password === undefined) {
-            console.log("default admin passwod", env.ADMIN_DEFAULT_PASSWORD);
             hashedPassword = await bcrypt.hash(env.ADMIN_DEFAULT_PASSWORD, saltRounds);
         } else {
             hashedPassword = await bcrypt.hash(dto.password, saltRounds);
@@ -87,7 +91,7 @@ export class AdminService {
     }
 
     async GetAdminByIdForGuard(adminId: string) {
-        return await this.cacheService.GetOrCreateWithLock(AdminKey(adminId), {
+        return await this.cacheService.GetOrCreate(AdminKey(adminId), {
             getFunc: () => this.RetrieveAdminDto(adminId),
             ttl: AdminCacheTTL,
         });
@@ -106,16 +110,17 @@ export class AdminService {
         return AdminDto.Map(admin);
     }
 
-    async Me(adminId: string) {
-        const admin = await this.adminRepository.findOne(
+    async Me(admin: AdminDto) {
+        const retrievedAdmin = await this.adminRepository.findOne(
             {
-                id: adminId,
+                id: admin.id,
             },
-            { populate: ["branch"] },
+            {
+                populate: ["branch"],
+            },
         );
 
-        if (admin !== null) throw new UnauthorizedException("admin not found");
-
-        return admin;
+        if (retrievedAdmin === null) throw new NotFoundException();
+        return AdminDto.Map(retrievedAdmin);
     }
 }

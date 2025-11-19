@@ -1,15 +1,53 @@
+version: "3.9"
+
 services:
+    mysql:
+        image: mysql:8.1
+        container_name: mcwd-mysql-production
+        env_file:
+            - .env
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        volumes:
+            - mysql_data-production:/var/lib/mysql
+        networks:
+            - mcwd-production-network
+
+    redis:
+        image: redis:7
+        container_name: mcwd-redis-production
+        command: ["redis-server", "--appendonly", "yes"]
+        volumes:
+            - redis_data-production:/data
+        networks:
+            - mcwd-production-network
+
     api:
-        container_name: mcwd-api-prod
-        image: ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:latest
+        container_name: mcwd-api-production
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: queuemcwd-api:latest
         ports:
             - "5000:5000"
         env_file:
             - .env
         environment:
             - NODE_ENV=production
+        depends_on:
+            - mysql
+            - redis
         networks:
-            - mcwd-network-prod
+            - mcwd-production-network
+
+        entrypoint: ["/usr/src/app/start.sh"]
+
+volumes:
+    mysql_data-production:
+    redis_data-production:
+
 networks:
-    mcwd-network-prod:
-        external: true
+    mcwd-production-network: {}

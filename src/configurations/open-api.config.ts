@@ -5,7 +5,7 @@ import { ACCESS_TOKEN } from "./constants.config";
 
 export default function UseApiDocumentations(app: INestApplication) {
     const config = new DocumentBuilder()
-        .setTitle("Labres API")
+        .setTitle("MCWD API")
         .setDescription("This is the official MCWD API")
         .setVersion("1.0")
         .addBearerAuth(
@@ -30,8 +30,8 @@ export default function UseApiDocumentations(app: INestApplication) {
         "/docs",
         apiReference({
             content: documentFactory(),
-            theme: "elysiajs",
-            layout: "classic",
+            theme: "deepSpace",
+            layout: "modern",
         }),
     );
 }

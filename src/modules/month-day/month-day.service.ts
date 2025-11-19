@@ -2,6 +2,7 @@ import { ForbiddenError } from "@casl/ability";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { MonthDayKey } from "src/constants/cache.constants";
 import { MonthDay } from "src/entities/monthDay.entity";
+import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
 import { AbilityFactory, Action } from "src/security/ability/ability.factory";
 import { generateSlotsForMonthDay } from "src/utils/generate-month-days.util";
@@ -12,12 +13,14 @@ import { SlotDto } from "../slots/dtos/slot.dto";
 import { BatchUpdateMonthDaySlotsDto } from "./dtos/batch-update/batch-update-month-day-slots.dto";
 import { MonthDayDto } from "./dtos/month-day.dto";
 import { UpdateMonthDayDto } from "./dtos/update-month-day.dto";
+import { Slot } from "src/entities/slot.entity";
 
 @Injectable()
 export class MonthDayService {
     constructor(
         private readonly slotRepository: SlotsRepository,
         private readonly abilityFactory: AbilityFactory,
+        private readonly monthDayRepository: MonthDayRepository,
         private readonly unitOfWork: UnitOfWork,
     ) {}
 
@@ -48,7 +51,7 @@ export class MonthDayService {
     }
 
     async GetAppointmentsFromMonthday(admin: AdminDto, monthDayId: string) {
-        const slots = await this.slotRepository.findAll({
+        const slots: Slot[] = await this.slotRepository.findAll({
             where: {
                 monthDay: {
                     id: monthDayId,
@@ -64,5 +67,11 @@ export class MonthDayService {
 
         const appointments = slots.flatMap((s) => s.appointments.getItems());
         return appointments.map((a) => AppointmentDto.Map(a));
+    }
+
+    async GetSlotsForMonthday(monthDay: MonthDay) {
+        await this.monthDayRepository.getEntityManager().populate(monthDay, ["slots"]);
+        const slots = monthDay.slots;
+        return slots.map((s) => SlotDto.Map(s));
     }
 }
