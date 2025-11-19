@@ -105,7 +105,7 @@ jobs:
             - name: Successful Deployment to Production
               if: success()
               env:
-                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
                   DISCORD_USERNAME: "Bini Mikha"
                   DISCORD_AVATAR: "https://scontent.fceb9-1.fna.fbcdn.net/v/t39.30808-6/449400457_122112877598351565_6658162309362256856_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHFs3s2gsjqpZjILGLL0zMKeB7THXgmBH54HtMdeCYEfnuIf_iLBBJoTsroPdLNxOkXg7DEG3803Fv8lEaxm-nw&_nc_ohc=flcqkE7XAVwQ7kNvwHrduBu&_nc_oc=Adk1R1UOsRBobq6ELs9TKUhy1_8lGxgKxlayoDi3XgNl2LaUylXLyk8iF9RFS3ig5C8&_nc_zt=23&_nc_ht=scontent.fceb9-1.fna&_nc_gid=0g0qlUGzMvB4ylKrat5O0A&oh=00_AfinOZ_AwxXMKGuMTtmOge-ppy3V_LPzEzUXrEszuThZJw&oe=69239FF9"
                   DISCORD_EMBEDS: >
