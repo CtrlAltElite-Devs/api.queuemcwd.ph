@@ -55,8 +55,8 @@ jobs:
               if: ${{ github.event_name == 'pull_request' }}
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK }}
-                  DISCORD_USERNAME: "PR Tanod"
-                  DISCORD_AVATAR: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDmXOAZ7hdOFtFyY-WGiqeFL97-uIprWQFKg&s"
+                  DISCORD_USERNAME: "Lint Kagawad"
+                  DISCORD_AVATAR: "https://i.pinimg.com/236x/e0/3a/82/e03a82c5fa01dc8a3825688810292eae.jpg"
                   DISCORD_EMBEDS: >
                       [
                          {
