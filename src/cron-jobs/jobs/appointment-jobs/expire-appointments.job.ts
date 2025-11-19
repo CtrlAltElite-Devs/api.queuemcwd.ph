@@ -28,10 +28,12 @@ export class ExpireAppointmentsJob extends BaseJob {
     private async expireOldAppointments(): Promise<JobRecordType> {
         try {
             const emInstance = this.em.fork();
+            const now = new Date();
             const result = await emInstance
                 .createQueryBuilder(Appointment)
                 .update({
                     queueStatus: QueueStatus.EXPIRED,
+                    noShowAt: now,
                 })
                 .where({
                     queueStatus: QueueStatus.ACTIVE,

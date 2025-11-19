@@ -31,6 +31,12 @@ export class BranchController {
         return await this.branchService.GetAllBranchesAsync();
     }
 
+    @Get("/:branchId")
+    @UseBranchGuard()
+    GetBranch(@BranchEntity() branch: Branch) {
+        return branch;
+    }
+
     @Get("/:branchId/month-days")
     @UseInterceptors(DynamicCacheInterceptor)
     @CacheTTL(BranchDataCacheTTL)
