@@ -19,6 +19,7 @@ export class CreateAppointmentDto {
 
     @ApiProperty()
     @IsString()
+    @IsNumericString({ message: "Account code must contain only numbers" })
     contact: string;
 
     @ApiProperty()
