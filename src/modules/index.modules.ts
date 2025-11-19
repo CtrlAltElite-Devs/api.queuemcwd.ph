@@ -9,6 +9,7 @@ import { jwtEnv } from "src/configurations/env/jwt.env";
 import { redisEnv } from "src/configurations/env/redis.env";
 import config from "../../mikro-orm.config";
 import { AdminModule } from "./admin/admin.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
 import { AppointmentModule } from "./appointment/appointment.module";
 import { BranchModule } from "./branch/branch.module";
 import { CommonModule } from "./common/common.module";
@@ -23,6 +24,7 @@ export const ApplicationModules = [
     CommonModule,
     MonthDayModule,
     SlotModule,
+    AnalyticsModule,
 ];
 
 export const InfrastructureModules = [

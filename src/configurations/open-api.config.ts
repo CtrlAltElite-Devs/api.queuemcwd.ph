@@ -30,8 +30,8 @@ export default function UseApiDocumentations(app: INestApplication) {
         "/docs",
         apiReference({
             content: documentFactory(),
-            theme: "elysiajs",
-            layout: "classic",
+            theme: "deepSpace",
+            layout: "modern",
         }),
     );
 }
