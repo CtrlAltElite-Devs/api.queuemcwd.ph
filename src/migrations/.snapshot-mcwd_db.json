@@ -677,6 +677,36 @@
                     "length": 255,
                     "mappedType": "string"
                 },
+                "completed_at": {
+                    "name": "completed_at",
+                    "type": "datetime",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": null,
+                    "mappedType": "datetime"
+                },
+                "cancelled_at": {
+                    "name": "cancelled_at",
+                    "type": "datetime",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": null,
+                    "mappedType": "datetime"
+                },
+                "no_show_at": {
+                    "name": "no_show_at",
+                    "type": "datetime",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": null,
+                    "mappedType": "datetime"
+                },
                 "appointment_type": {
                     "name": "appointment_type",
                     "type": "varchar(255)",

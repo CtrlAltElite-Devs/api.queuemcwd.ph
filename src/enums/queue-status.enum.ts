@@ -5,4 +5,5 @@ export enum QueueStatus {
     CANCELLED = "cancelled",
     EXPIRED = "expired",
     DONE = "done",
+    NO_SHOW = "noShow",
 }

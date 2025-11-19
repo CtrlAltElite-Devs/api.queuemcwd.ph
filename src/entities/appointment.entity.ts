@@ -1,4 +1,5 @@
 import { Entity, Index, ManyToOne, Opt, Property, Unique } from "@mikro-orm/core";
+import { BadRequestException } from "@nestjs/common";
 import { CreateAppointmentDto } from "src/modules/appointment/dtos/create-appointment.dto";
 import { AppointmentType } from "../enums/appointment-type.enum";
 import { QueueStatus } from "../enums/queue-status.enum";
@@ -30,6 +31,15 @@ export class Appointment extends CustomBaseEntity {
     @Index()
     queueStatus: QueueStatus;
 
+    @Property({ nullable: true })
+    completedAt?: Date;
+
+    @Property({ nullable: true })
+    cancelledAt?: Date;
+
+    @Property({ nullable: true })
+    noShowAt?: Date;
+
     @Property()
     @Index()
     appointmentType: AppointmentType;
@@ -54,5 +64,23 @@ export class Appointment extends CustomBaseEntity {
         newAppointment.slot = slot;
         newAppointment.branch = slot.branch;
         return newAppointment;
+    }
+
+    updateStatus(newStatus: QueueStatus) {
+        const now = new Date();
+
+        switch (newStatus) {
+            case QueueStatus.DONE:
+                this.completedAt = now;
+                break;
+            case QueueStatus.CANCELLED:
+                this.cancelledAt = now;
+                break;
+            default:
+                throw new BadRequestException("Invalid status update");
+        }
+
+        this.queueStatus = newStatus;
+        this.updatedAt = new Date();
     }
 }
