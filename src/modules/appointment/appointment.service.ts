@@ -104,7 +104,7 @@ export class AppointmentService {
                 break;
         }
 
-        appointment.queueStatus = newStatus;
+        appointment.updateStatus(newStatus);
         await this.appointmentRepository.getEntityManager().flush();
 
         return AppointmentDto.Map(appointment);
