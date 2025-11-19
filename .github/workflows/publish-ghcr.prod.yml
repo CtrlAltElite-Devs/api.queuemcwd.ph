@@ -16,6 +16,16 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            # Deployment Started
+            - name: Deployment to Production notification
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+                  DISCORD_USERNAME: "Bini Mikha"
+                  DISCORD_AVATAR: "https://scontent.fceb9-1.fna.fbcdn.net/v/t39.30808-6/449400457_122112877598351565_6658162309362256856_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHFs3s2gsjqpZjILGLL0zMKeB7THXgmBH54HtMdeCYEfnuIf_iLBBJoTsroPdLNxOkXg7DEG3803Fv8lEaxm-nw&_nc_ohc=flcqkE7XAVwQ7kNvwHrduBu&_nc_oc=Adk1R1UOsRBobq6ELs9TKUhy1_8lGxgKxlayoDi3XgNl2LaUylXLyk8iF9RFS3ig5C8&_nc_zt=23&_nc_ht=scontent.fceb9-1.fna&_nc_gid=0g0qlUGzMvB4ylKrat5O0A&oh=00_AfinOZ_AwxXMKGuMTtmOge-ppy3V_LPzEzUXrEszuThZJw&oe=69239FF9"
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "Bawat araw, mas sumasaya, magmula nang nakita ka 🌸, We have a deployment today by ${{github.actor}}, good luck! 💓"
+
             # 1️⃣ Checkout repository
             - name: Checkout code
               uses: actions/checkout@v4
@@ -71,15 +81,33 @@ jobs:
 
                       SHA_TAG=$(git rev-parse HEAD)
 
-                      # Log in to GHCR on VPS
-                      echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u "${{ secrets.GH_USERNAME }}" --password-stdin
-
-                      # Pull latest prod image
-                      docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:latest
-                      docker pull ghcr.io/ctrlaltelite-devs/api.queuemcwd.ph:${SHA_TAG}
-
                       # 🚀 Stop old containers before starting new ones
-                      docker compose -p prod -f docker-compose.prod.yml down
+                      docker compose -p mwcd-prod -f docker-compose.prod.yml down
+
+                      # Build the image with no cache
+                      docker compose -p mwcd-prod -f docker-compose.prod.yml build --no-cache
 
                       # 🆕 Start new containers
-                      docker compose -p prod -f docker-compose.prod.yml up -d
+                      docker compose -p mwcd-prod -f docker-compose.prod.yml up -d
+
+            # if deployment failed
+            - name: Failed Deployment to production notification
+              if: failure()
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+                  DISCORD_USERNAME: "Bini Mikha"
+                  DISCORD_AVATAR: "https://scontent.fceb9-1.fna.fbcdn.net/v/t39.30808-6/449400457_122112877598351565_6658162309362256856_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHFs3s2gsjqpZjILGLL0zMKeB7THXgmBH54HtMdeCYEfnuIf_iLBBJoTsroPdLNxOkXg7DEG3803Fv8lEaxm-nw&_nc_ohc=flcqkE7XAVwQ7kNvwHrduBu&_nc_oc=Adk1R1UOsRBobq6ELs9TKUhy1_8lGxgKxlayoDi3XgNl2LaUylXLyk8iF9RFS3ig5C8&_nc_zt=23&_nc_ht=scontent.fceb9-1.fna&_nc_gid=0g0qlUGzMvB4ylKrat5O0A&oh=00_AfinOZ_AwxXMKGuMTtmOge-ppy3V_LPzEzUXrEszuThZJw&oe=69239FF9"
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "shucks! ${{github.actor}} something went wrong with the deployment. It's okay let's try again."
+
+            # if deployment succeeded
+            - name: Successful Deployment to production
+              if: success()
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+                  DISCORD_USERNAME: "Bini Mikha"
+                  DISCORD_AVATAR: "https://scontent.fceb9-1.fna.fbcdn.net/v/t39.30808-6/449400457_122112877598351565_6658162309362256856_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHFs3s2gsjqpZjILGLL0zMKeB7THXgmBH54HtMdeCYEfnuIf_iLBBJoTsroPdLNxOkXg7DEG3803Fv8lEaxm-nw&_nc_ohc=flcqkE7XAVwQ7kNvwHrduBu&_nc_oc=Adk1R1UOsRBobq6ELs9TKUhy1_8lGxgKxlayoDi3XgNl2LaUylXLyk8iF9RFS3ig5C8&_nc_zt=23&_nc_ht=scontent.fceb9-1.fna&_nc_gid=0g0qlUGzMvB4ylKrat5O0A&oh=00_AfinOZ_AwxXMKGuMTtmOge-ppy3V_LPzEzUXrEszuThZJw&oe=69239FF9"
+              uses: Ilshidur/action-discord@0.4.0
+              with:
+                  args: "YAY, SUCCESS! 🎉🎊 deployment successful! 👏 Let's celebrate, team! 🥳."
