@@ -32,8 +32,8 @@ export class MonthDaySeederJob extends BaseJob {
         const lastDayOfMonth = now.clone().endOf("month");
         const daysUntilEnd = lastDayOfMonth.diff(now, "days");
 
-        if (daysUntilEnd >= 7) {
-            this.logger.log("Not yet within the last week of the month. Skipping seeding...");
+        if (daysUntilEnd >= 14) {
+            this.logger.log("Not yet within the last 2 weeks of the month. Skipping seeding...");
             return { status: "skipped", details: "Too early for next month seeding" };
         }
 
@@ -41,7 +41,8 @@ export class MonthDaySeederJob extends BaseJob {
         const nextMonthMetaData = getNextMonthMetadata();
         const { month, year } = nextMonthMetaData;
 
-        const branches = await this.em.findAll(Branch);
+        const emInstance = this.em.fork();
+        const branches = await emInstance.findAll(Branch);
         if (branches.length === 0) {
             const msg = "No branches found. Skipping month day seeding for branches.";
             this.logger.log(msg);
@@ -51,7 +52,7 @@ export class MonthDaySeederJob extends BaseJob {
         let seededCount = 0;
 
         for (const branch of branches) {
-            const existsForBranch = await this.em.findOne(MonthDay, {
+            const existsForBranch = await emInstance.findOne(MonthDay, {
                 month,
                 year,
                 branch,
@@ -70,7 +71,7 @@ export class MonthDaySeederJob extends BaseJob {
 
             try {
                 const monthDays = createMonthDays(branch, nextMonthMetaData);
-                await this.em.persistAndFlush(monthDays);
+                await emInstance.persistAndFlush(monthDays);
                 seededCount++;
                 this.logger.log(
                     `MonthDays seeded successfully for branch ${branch.name} (${branch.id})`,
