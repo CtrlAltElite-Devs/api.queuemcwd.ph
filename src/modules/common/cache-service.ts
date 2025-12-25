@@ -4,7 +4,7 @@ import type { Cache } from "cache-manager";
 import { RedisService } from "./redis-service";
 
 export type GetOrCreateOptions<T> = {
-    getFunc: () => Promise<T>;
+    factory: () => Promise<T>;
     ttl?: number;
 };
 
@@ -18,7 +18,7 @@ export class CacheService {
     ) {}
 
     async GetOrCreate<T>(key: string, options: GetOrCreateOptions<T>): Promise<T> {
-        return await this.redisService.getOrCreate<T>(key, options.getFunc, options.ttl);
+        return await this.redisService.getOrCreate<T>(key, options.factory, options.ttl);
     }
 
     async Get<T>(key: string): Promise<T | undefined> {

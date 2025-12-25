@@ -1,13 +1,14 @@
+import { ForbiddenError } from "@casl/ability";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import moment from "moment";
 import { SlotKey } from "src/constants/cache.constants";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { AbilityFactory, Action } from "src/security/ability/ability.factory";
 import { Slot } from "../../entities/slot.entity";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
-import { BranchAdminValidator } from "../common/validators/branch-admin.validator";
 import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
@@ -19,6 +20,7 @@ export class SlotsService {
         private readonly slotRepository: SlotsRepository,
         private readonly monthDayRepository: MonthDayRepository,
         private readonly unitOfWork: UnitOfWork,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     GetSlotByIdAsync(slot: Slot) {
@@ -78,7 +80,8 @@ export class SlotsService {
 
         if (monthDay === null) throw new NotFoundException("Month day not found");
 
-        BranchAdminValidator.EnsureIsAssignedToBranch(admin, monthDay.branch);
+        const adminAbility = this.abilityFactory.defineAbilityForAdmin(admin);
+        ForbiddenError.from(adminAbility).throwUnlessCan(Action.Manage, monthDay.branch);
 
         SlotValidator.ValidateLimit(dto.limit);
 

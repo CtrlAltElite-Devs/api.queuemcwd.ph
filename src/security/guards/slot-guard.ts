@@ -46,7 +46,7 @@ export class SlotGuard implements CanActivate {
 
         if (isReadonly) {
             slot = await this.cacheService.GetOrCreate(SlotKey(slotId), {
-                getFunc: () => this.LoadFromDB(slotId),
+                factory: () => this.LoadFromDB(slotId),
                 ttl: SlotTTL,
             });
         } else {

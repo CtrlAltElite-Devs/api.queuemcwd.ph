@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { BranchKey } from "src/constants/cache.constants";
+import { BranchDataCacheKey, BranchDataCacheTTL, BranchKey } from "src/constants/cache.constants";
 import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
@@ -16,6 +16,7 @@ import { BranchDto } from "./dto/branch.dto";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { SlotDtosResponse } from "../slots/dtos/slot-dtos-response";
+import { CacheService } from "../common/cache-service";
 
 @Injectable()
 export class BranchService {
@@ -25,10 +26,14 @@ export class BranchService {
         private readonly slotRepository: SlotsRepository,
         private readonly adminRepository: AdminRepository,
         private readonly unitOfWork: UnitOfWork,
+        private readonly cacheService: CacheService,
     ) {}
 
     async GetAllBranchesAsync(): Promise<BranchDto[]> {
-        const branches = await this.branchRepository.findAll();
+        const branches = await this.cacheService.GetOrCreate(`${BranchDataCacheKey}:*`, {
+            factory: () => this.branchRepository.findAll(),
+            ttl: BranchDataCacheTTL,
+        });
         if (branches.length > 0) {
             return branches.map((branch) => {
                 return BranchDto.Map(branch);
