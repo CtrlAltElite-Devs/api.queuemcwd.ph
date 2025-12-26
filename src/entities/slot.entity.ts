@@ -6,6 +6,7 @@ import { Appointment } from "./appointment.entity";
 import { CustomBaseEntity } from "./base.entity";
 import { Branch } from "./branch.entity";
 import { MonthDay } from "./monthDay.entity";
+import { UpdateSlotDto } from "src/modules/slots/dtos/update-slot.dto";
 
 @Entity({ repository: () => SlotsRepository })
 @Index({ properties: ["startTime", "endTime"] })
@@ -35,6 +36,13 @@ export class Slot extends CustomBaseEntity {
         return this.appointments.filter(
             (a) => a.queueStatus === QueueStatus.ACTIVE || a.queueStatus === QueueStatus.PENDING,
         ).length;
+    }
+
+    ApplyScalarUpdates(dto: UpdateSlotDto) {
+        if (dto.isActive !== undefined && dto.isActive !== this.isActive)
+            this.isActive = dto.isActive;
+
+        if (dto.limit !== undefined && dto.limit !== this.limit) this.limit = dto.limit;
     }
 
     static Create(dto: CreateSlotDto, startTime: Date, endTime: Date): Slot {

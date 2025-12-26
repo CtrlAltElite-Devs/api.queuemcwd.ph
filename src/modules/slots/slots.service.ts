@@ -13,7 +13,6 @@ import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
 import { SlotValidator } from "./validators/slot.validator";
-import { wrap } from "@mikro-orm/core";
 
 @Injectable()
 export class SlotsService {
@@ -38,7 +37,7 @@ export class SlotsService {
 
         SlotValidator.ValidateLimit(dto.limit);
 
-        const { startTime, endTime, ...scalarProps } = dto;
+        const { startTime, endTime } = dto;
 
         if (startTime && endTime) {
             const neighborSlots = await this.slotRepository.find({
@@ -59,9 +58,7 @@ export class SlotsService {
             );
         }
 
-        wrap(slot).assign(scalarProps, {
-            ignoreUndefined: true,
-        });
+        slot.ApplyScalarUpdates(dto);
 
         await this.unitOfWork.Commit({ invalidateKeys: SlotKey(slot.id) });
         return SlotDto.Map(slot);

@@ -3,6 +3,7 @@ import { BranchRepository } from "../repositories/branch.repository";
 import { Admin } from "./admin.entity";
 import { CustomBaseEntity } from "./base.entity";
 import { MonthDay } from "./monthDay.entity";
+import { UpdateBranchDto } from "src/modules/branch/dto/update-branch.dto";
 
 @Entity({ repository: () => BranchRepository })
 export class Branch extends CustomBaseEntity {
@@ -24,4 +25,13 @@ export class Branch extends CustomBaseEntity {
 
     @OneToMany(() => MonthDay, (md) => md.branch, { cascade: [Cascade.PERSIST] })
     monthDays = new Collection<MonthDay>(this);
+
+    ApplyScalarUpdates(dto: UpdateBranchDto) {
+        if (dto.name && dto.name !== this.name) this.name = dto.name;
+
+        if (dto.address && dto.address !== this.address) this.address = dto.address;
+
+        if (dto.allowedTimeFrame && dto.allowedTimeFrame !== this.allowedTimeFrame)
+            this.allowedTimeFrame = dto.allowedTimeFrame;
+    }
 }

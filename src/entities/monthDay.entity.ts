@@ -12,6 +12,7 @@ import { MonthDayRepository } from "../repositories/month-day.repository";
 import { CustomBaseEntity } from "./base.entity";
 import { Branch } from "./branch.entity";
 import { Slot } from "./slot.entity";
+import { UpdateMonthDayDto } from "src/modules/month-day/dtos/update-month-day.dto";
 
 @Entity({ repository: () => MonthDayRepository })
 @Index({ properties: ["branch", "year", "month"] })
@@ -46,6 +47,14 @@ export class MonthDay extends CustomBaseEntity {
 
     ConvertToMoment() {
         return moment({ year: this.year, month: this.month - 1, day: this.day });
+    }
+
+    ApplyScalarUpdates(dto: UpdateMonthDayDto) {
+        if (dto.isWorkingDay && dto.isWorkingDay !== this.isWorkingDay)
+            this.isWorkingDay = dto.isWorkingDay;
+
+        if (dto.additionalNotes && dto.additionalNotes !== this.additionalNotes)
+            this.additionalNotes = dto.additionalNotes;
     }
 }
 

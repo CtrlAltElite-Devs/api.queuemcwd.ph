@@ -17,7 +17,6 @@ import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { SlotDtosResponse } from "../slots/dtos/slot-dtos-response";
 import { CacheService } from "../common/cache-service";
-import { wrap } from "@mikro-orm/core";
 
 @Injectable()
 export class BranchService {
@@ -170,14 +169,9 @@ export class BranchService {
     }
 
     async UpdateBranchAsync(branch: Branch, dto: UpdateBranchDto) {
-        const { adminIds, ...scalarProps } = dto;
-
-        wrap(branch).assign(scalarProps, {
-            ignoreUndefined: true,
-        });
-
+        const { adminIds } = dto;
+        branch.ApplyScalarUpdates(dto);
         await this.handleAdminAssignments(branch, adminIds);
-
         await this.unitOfWork.Commit({
             invalidateKeys: BranchKey(branch.id),
         });
