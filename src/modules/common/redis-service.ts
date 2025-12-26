@@ -19,7 +19,7 @@ export class RedisService implements OnModuleDestroy {
      * @param factory Function that returns the value to generate when missing
      * @param ttlSeconds Optional expiration time in seconds
      */
-    async getOrCreate<T>(key: string, factory: () => Promise<T>, ttlSeconds?: number): Promise<T> {
+    async GetOrCreate<T>(key: string, factory: () => Promise<T>, ttlSeconds?: number): Promise<T> {
         // 1. Try reading cached value
         const cached = await this.client.get(key);
         if (cached !== null) {
@@ -46,6 +46,7 @@ export class RedisService implements OnModuleDestroy {
 
         return createdValue;
     }
+
     onModuleDestroy() {
         this.client.destroy();
     }

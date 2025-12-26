@@ -1,5 +1,4 @@
 import { Cascade, Collection, Entity, OneToMany, Property, Unique } from "@mikro-orm/core";
-import { UpdateBranchDto } from "../modules/branch/dto/update-branch.dto";
 import { BranchRepository } from "../repositories/branch.repository";
 import { Admin } from "./admin.entity";
 import { CustomBaseEntity } from "./base.entity";
@@ -25,18 +24,4 @@ export class Branch extends CustomBaseEntity {
 
     @OneToMany(() => MonthDay, (md) => md.branch, { cascade: [Cascade.PERSIST] })
     monthDays = new Collection<MonthDay>(this);
-
-    Update(dto: UpdateBranchDto) {
-        if (dto.name) {
-            this.name = dto.name;
-        }
-
-        if (dto.address) {
-            this.address = dto.address;
-        }
-
-        if (dto.allowedTimeFrame) {
-            this.allowedTimeFrame = dto.allowedTimeFrame;
-        }
-    }
 }

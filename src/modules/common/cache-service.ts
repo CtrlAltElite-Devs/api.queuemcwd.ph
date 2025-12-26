@@ -18,7 +18,7 @@ export class CacheService {
     ) {}
 
     async GetOrCreate<T>(key: string, options: GetOrCreateOptions<T>): Promise<T> {
-        return await this.redisService.getOrCreate<T>(key, options.factory, options.ttl);
+        return await this.redisService.GetOrCreate<T>(key, options.factory, options.ttl);
     }
 
     async Get<T>(key: string): Promise<T | undefined> {

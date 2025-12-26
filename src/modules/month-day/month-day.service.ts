@@ -13,6 +13,7 @@ import { BatchUpdateMonthDaySlotsDto } from "./dtos/batch-update/batch-update-mo
 import { MonthDayDto } from "./dtos/month-day.dto";
 import { UpdateMonthDayDto } from "./dtos/update-month-day.dto";
 import { Slot } from "src/entities/slot.entity";
+import { wrap } from "@mikro-orm/core";
 
 @Injectable()
 export class MonthDayService {
@@ -23,7 +24,9 @@ export class MonthDayService {
     ) {}
 
     async UpdateMonthDay(monthDay: MonthDay, dto: UpdateMonthDayDto) {
-        monthDay.Update(dto);
+        wrap(monthDay).assign(dto, {
+            ignoreUndefined: true,
+        });
         await this.unitOfWork.Commit({ invalidateKeys: MonthDayKey(monthDay.id) });
         return MonthDayDto.Map(monthDay);
     }
