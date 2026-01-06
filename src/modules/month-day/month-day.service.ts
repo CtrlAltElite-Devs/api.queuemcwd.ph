@@ -23,7 +23,7 @@ export class MonthDayService {
     ) {}
 
     async UpdateMonthDay(monthDay: MonthDay, dto: UpdateMonthDayDto) {
-        monthDay.Update(dto);
+        monthDay.ApplyScalarUpdates(dto);
         await this.unitOfWork.Commit({ invalidateKeys: MonthDayKey(monthDay.id) });
         return MonthDayDto.Map(monthDay);
     }
@@ -38,7 +38,7 @@ export class MonthDayService {
         monthDay.slots.set([...generatedSlots]);
 
         // persist
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: MonthDayKey(monthDay.id) });
 
         return generatedSlots.map((slot) => {
             const dto = SlotDto.Map(slot);
