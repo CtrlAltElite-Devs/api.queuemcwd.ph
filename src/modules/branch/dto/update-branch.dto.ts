@@ -1,23 +1,23 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class UpdateBranchDto {
-    @ApiProperty()
+    @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    name: string;
+    name?: string;
 
-    @ApiProperty()
+    @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    address: string;
+    address?: string;
 
-    @ApiProperty()
+    @ApiPropertyOptional()
     @IsOptional()
     @IsInt()
     @Min(7, { message: "minimum allowed time frame should be 7" })
     @Max(14, { message: "maximum allowed time frame is 14" })
-    allowedTimeFrame: number;
+    allowedTimeFrame?: number;
 
     @ApiPropertyOptional({
         type: [String],

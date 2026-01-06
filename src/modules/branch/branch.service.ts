@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { BranchKey } from "src/constants/cache.constants";
+import { BranchDataCacheKey, BranchDataCacheTTL, BranchKey } from "src/constants/cache.constants";
 import { Branch } from "src/entities/branch.entity";
 import { AdminRepository } from "src/repositories/admin.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
@@ -16,6 +16,7 @@ import { BranchDto } from "./dto/branch.dto";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { SlotDtosResponse } from "../slots/dtos/slot-dtos-response";
+import { CacheService } from "../common/cache-service";
 
 @Injectable()
 export class BranchService {
@@ -25,15 +26,19 @@ export class BranchService {
         private readonly slotRepository: SlotsRepository,
         private readonly adminRepository: AdminRepository,
         private readonly unitOfWork: UnitOfWork,
+        private readonly cacheService: CacheService,
     ) {}
 
     async GetAllBranchesAsync(): Promise<BranchDto[]> {
-        const branches = await this.branchRepository.findAll();
+        const branches = await this.cacheService.GetOrCreate(`${BranchDataCacheKey}:*`, {
+            factory: () => this.branchRepository.findAll(),
+            ttl: BranchDataCacheTTL,
+        });
+
         if (branches.length > 0) {
-            return branches.map((branch) => {
-                return BranchDto.Map(branch);
-            });
+            return branches.map((branch) => BranchDto.Map(branch));
         }
+
         return [];
     }
 
@@ -47,25 +52,7 @@ export class BranchService {
         newBranch.branchCode = dto.branchCode;
         newBranch.address = dto.address;
 
-        if (dto.adminIds && dto.adminIds.length > 0) {
-            const admins = await this.adminRepository.find(
-                { id: { $in: dto.adminIds } },
-                { populate: ["branch"] },
-            );
-
-            if (admins.length === 0) {
-                throw new BadRequestException("Please verify admin ids");
-            }
-
-            for (const admin of admins) {
-                if (admin.branch !== null) {
-                    throw new BadRequestException(
-                        `Admin with id:${admin.id} is already assigned to branch:${admin.branch?.branchCode} `,
-                    );
-                }
-                admin.branch = newBranch;
-            }
-        }
+        await this.handleAdminAssignments(newBranch, dto.adminIds);
 
         this.branchRepository.create(newBranch);
 
@@ -182,10 +169,35 @@ export class BranchService {
     }
 
     async UpdateBranchAsync(branch: Branch, dto: UpdateBranchDto) {
-        branch.Update(dto);
+        const { adminIds } = dto;
+        branch.ApplyScalarUpdates(dto);
+        await this.handleAdminAssignments(branch, adminIds);
         await this.unitOfWork.Commit({
             invalidateKeys: BranchKey(branch.id),
         });
+
         return branch;
+    }
+
+    private async handleAdminAssignments(branch: Branch, adminIds?: string[]) {
+        if (adminIds && adminIds.length > 0) {
+            const admins = await this.adminRepository.find(
+                { id: { $in: adminIds } },
+                { populate: ["branch"] },
+            );
+
+            if (admins.length === 0) {
+                throw new BadRequestException("Please verify admin ids");
+            }
+
+            for (const admin of admins) {
+                if (admin.branch !== null) {
+                    throw new BadRequestException(
+                        `Admin with id:${admin.id} is already assigned to branch:${admin.branch?.branchCode} `,
+                    );
+                }
+                admin.branch = branch;
+            }
+        }
     }
 }

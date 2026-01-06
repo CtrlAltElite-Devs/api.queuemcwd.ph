@@ -21,6 +21,7 @@ import { MonthDayResourceParameter } from "../month-day/resource-parameters/mont
 import { BranchService } from "./branch.service";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
+import { ApiParam } from "@nestjs/swagger";
 
 @Controller("branch")
 export class BranchController {
@@ -81,6 +82,7 @@ export class BranchController {
     }
 
     @Patch("/:branchId")
+    @ApiParam({ name: "branchId", type: "string", format: "uuid", required: true })
     @UseBranchGuard()
     async UpdateBranch2(@BranchEntity() branch: Branch, @Body() dto: UpdateBranchDto) {
         return await this.branchService.UpdateBranchAsync(branch, dto);
