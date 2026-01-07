@@ -1,24 +1,27 @@
 import { QBFilterQuery } from "@mikro-orm/core";
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsDateString, IsEnum, IsOptional } from "class-validator";
+import { IsEnum, IsOptional, IsDate } from "class-validator";
+import { Type } from "class-transformer";
 import { Appointment } from "src/entities/appointment.entity";
 import { AppointmentType } from "src/enums/appointment-type.enum";
 
 export class AppointmentResourceParameter {
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ example: "2025-03-20T00:00:00Z" })
     @IsOptional()
-    @IsDateString()
+    @Type(() => Date)
+    @IsDate()
     from?: Date;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ example: "2025-03-21T00:00:00Z" })
     @IsOptional()
-    @IsDateString()
+    @Type(() => Date)
+    @IsDate()
     to?: Date;
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsEnum(AppointmentType)
-    appointmentType: AppointmentType;
+    appointmentType?: AppointmentType;
 
     GetFilters(): QBFilterQuery<Appointment> {
         const filters: QBFilterQuery<Appointment> = {};
@@ -28,9 +31,9 @@ export class AppointmentResourceParameter {
         }
 
         if (this.from || this.to) {
-            filters.createdAt = {
-                ...(this.from && { $gte: new Date(this.from) }),
-                ...(this.to && { $lte: new Date(this.to) }),
+            filters.dateValidity = {
+                ...(this.from && { $gte: this.from }),
+                ...(this.to && { $lte: this.to }),
             };
         }
 
