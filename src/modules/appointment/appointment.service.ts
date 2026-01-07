@@ -8,8 +8,6 @@ import { UnitOfWork } from "../common/unit-of-work";
 import { AppointmentDto } from "./dtos/appointment.dto";
 import { CreateAppointmentDto } from "./dtos/create-appointment.dto";
 import { AppointmentValidator } from "./validators/appointment.validator";
-import { AppointmentResourceParameter } from "./resource-parameters/appointment-params";
-import { Branch } from "src/entities/branch.entity";
 
 @Injectable()
 export class AppointmentService {
@@ -110,10 +108,5 @@ export class AppointmentService {
         await this.appointmentRepository.getEntityManager().flush();
 
         return AppointmentDto.Map(appointment);
-    }
-
-    async GetAppointmentsForAdmin(branch: Branch, params: AppointmentResourceParameter) {
-        const results = await this.appointmentRepository.GetAppointmentsForAdmin(branch.id, params);
-        return results.map((a) => AppointmentDto.Map(a));
     }
 }

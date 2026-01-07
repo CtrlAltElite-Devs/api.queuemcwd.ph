@@ -22,6 +22,7 @@ import { BranchService } from "./branch.service";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { ApiParam } from "@nestjs/swagger";
+import { AppointmentResourceParameter } from "../appointment/resource-parameters/appointment-params";
 
 @Controller("branch")
 export class BranchController {
@@ -86,5 +87,15 @@ export class BranchController {
     @UseBranchGuard()
     async UpdateBranch2(@BranchEntity() branch: Branch, @Body() dto: UpdateBranchDto) {
         return await this.branchService.UpdateBranchAsync(branch, dto);
+    }
+
+    @Get("/:branchId/appointments")
+    @UseBranchGuard()
+    async GetAppointmentsForBranch(
+        @Param("branchId", new ParseUUIDPipe()) branchId: string,
+        @Query() params: AppointmentResourceParameter,
+        @BranchEntity() branch: Branch,
+    ) {
+        return await this.branchService.GetAppointmentsForBranch(branch, params);
     }
 }
