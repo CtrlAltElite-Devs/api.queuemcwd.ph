@@ -6,10 +6,9 @@ import { AdminModule } from "../admin/admin.module";
 import { CommonModule } from "../common/common.module";
 import { AppointmentController } from "./appointment.controller";
 import { AppointmentService } from "./appointment.service";
-import { Branch } from "src/entities/branch.entity";
 
 @Module({
-    imports: [MikroOrmModule.forFeature([Appointment, Slot, Branch]), CommonModule, AdminModule],
+    imports: [MikroOrmModule.forFeature([Appointment, Slot]), CommonModule, AdminModule],
     controllers: [AppointmentController],
     providers: [AppointmentService],
 })
