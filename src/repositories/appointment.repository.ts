@@ -1,6 +1,7 @@
 import { EntityRepository } from "@mikro-orm/mysql";
 import { Appointment } from "src/entities/appointment.entity";
 import { generateAppointmentCode } from "../utils/generate-appointment-code.util";
+import { AppointmentResourceParameter } from "src/modules/appointment/resource-parameters/appointment-params";
 
 type OverviewDto = {
     total: number;
@@ -410,5 +411,12 @@ export class AppointmentRepository extends EntityRepository<Appointment> {
             noShow: Number(r.noShow),
             pending: Number(r.pending),
         }));
+    }
+
+    async GetAppointmentsForAdmin(branchId: string, params: AppointmentResourceParameter) {
+        return this.find(
+            { branch: branchId, ...params.GetFilters() },
+            { populate: ["slot", "branch"] },
+        );
     }
 }
