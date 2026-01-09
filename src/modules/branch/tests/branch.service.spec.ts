@@ -1,13 +1,17 @@
 import { Collection } from "@mikro-orm/core";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { Branch } from "src/entities/branch.entity";
 import { MonthDay } from "src/entities/monthDay.entity";
 import { BranchService } from "src/modules/branch/branch.service";
 import { CreateBranchDto } from "src/modules/branch/dto/create-branch.dto";
+import { CacheService } from "src/modules/common/cache-service";
+import { RedisService } from "src/modules/common/redis-service";
 import { UnitOfWork } from "src/modules/common/unit-of-work";
 import { SeedMonthDayDto } from "src/modules/month-day/dtos/seed-month-day.dto";
 import { AdminRepository } from "src/repositories/admin.repository";
+import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
@@ -29,7 +33,7 @@ describe("BranchService", () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [BranchService],
+            providers: [BranchService, CacheService],
         })
             .useMocker((token) => {
                 if (token === BranchRepository) {
@@ -53,6 +57,29 @@ describe("BranchService", () => {
                 }
                 if (token === UnitOfWork) {
                     return { Commit: jest.fn() };
+                }
+                if (token == CacheService) {
+                    return { GetOrCreate: jest.fn() };
+                }
+                if (token === CACHE_MANAGER) {
+                    return {
+                        get: jest.fn(),
+                        set: jest.fn(),
+                        del: jest.fn(),
+                    };
+                }
+
+                if (token === RedisService) {
+                    return {
+                        get: jest.fn(),
+                        set: jest.fn(),
+                    };
+                }
+
+                if (token === AppointmentRepository) {
+                    return {
+                        GetAppointmentsForAdmin: jest.fn(),
+                    };
                 }
             })
             .compile();
