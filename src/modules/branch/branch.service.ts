@@ -17,6 +17,9 @@ import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { SlotDtosResponse } from "../slots/dtos/slot-dtos-response";
 import { CacheService } from "../common/cache-service";
+import { AppointmentRepository } from "src/repositories/appointment.repository";
+import { AppointmentResourceParameter } from "../appointment/resource-parameters/appointment-params";
+import { AppointmentDto } from "../appointment/dtos/appointment.dto";
 
 @Injectable()
 export class BranchService {
@@ -25,6 +28,7 @@ export class BranchService {
         private readonly monthDayRepository: MonthDayRepository,
         private readonly slotRepository: SlotsRepository,
         private readonly adminRepository: AdminRepository,
+        private readonly appointmentRepository: AppointmentRepository,
         private readonly unitOfWork: UnitOfWork,
         private readonly cacheService: CacheService,
     ) {}
@@ -199,5 +203,10 @@ export class BranchService {
                 admin.branch = branch;
             }
         }
+    }
+
+    async GetAppointmentsForBranch(branch: Branch, params: AppointmentResourceParameter) {
+        const results = await this.appointmentRepository.GetAppointmentsForAdmin(branch.id, params);
+        return results.map((a) => AppointmentDto.Map(a));
     }
 }

@@ -11,6 +11,7 @@ import { RedisService } from "src/modules/common/redis-service";
 import { UnitOfWork } from "src/modules/common/unit-of-work";
 import { SeedMonthDayDto } from "src/modules/month-day/dtos/seed-month-day.dto";
 import { AdminRepository } from "src/repositories/admin.repository";
+import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { BranchRepository } from "src/repositories/branch.repository";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
@@ -72,6 +73,12 @@ describe("BranchService", () => {
                     return {
                         get: jest.fn(),
                         set: jest.fn(),
+                    };
+                }
+
+                if (token === AppointmentRepository) {
+                    return {
+                        GetAppointmentsForAdmin: jest.fn(),
                     };
                 }
             })
