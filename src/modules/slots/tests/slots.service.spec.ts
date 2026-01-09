@@ -12,6 +12,7 @@ import { UpdateSlotDto } from "src/modules/slots/dtos/update-slot.dto";
 import { SlotsService } from "src/modules/slots/slots.service";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { AbilityFactory } from "src/security/ability/ability.factory";
 
 describe("SlotsService", () => {
     let service: SlotsService;
@@ -21,7 +22,7 @@ describe("SlotsService", () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [SlotsService],
+            providers: [SlotsService, AbilityFactory],
         })
             .useMocker((token) => {
                 if (token === SlotsRepository) {
@@ -38,6 +39,10 @@ describe("SlotsService", () => {
                 }
                 if (token === UnitOfWork) {
                     return { Commit: jest.fn() };
+                }
+
+                if (token == AbilityFactory) {
+                    return { defineAbilityForAdmin: jest.fn() };
                 }
             })
             .compile();
@@ -100,6 +105,7 @@ describe("SlotsService", () => {
 
             const dto = new UpdateSlotDto();
             dto.limit = 20;
+            dto.isActive = false;
             dto.startTime = "10:00";
             dto.endTime = "11:00";
 
@@ -107,6 +113,7 @@ describe("SlotsService", () => {
             const spyCommit = jest.spyOn(unitOfWork, "Commit");
             expect(spyCommit).toHaveBeenCalled();
             expect(result.maxCapacity).toBe(20);
+            expect(result.isActive).toBe(false);
         });
 
         it("should throw if invalid time format", async () => {
