@@ -1,13 +1,14 @@
+import { ForbiddenError } from "@casl/ability";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import moment from "moment";
 import { SlotKey } from "src/constants/cache.constants";
 import { QueueStatus } from "src/enums/queue-status.enum";
 import { MonthDayRepository } from "src/repositories/month-day.repository";
 import { SlotsRepository } from "src/repositories/slots.repository";
+import { AbilityFactory, Action } from "src/security/ability/ability.factory";
 import { Slot } from "../../entities/slot.entity";
 import { AdminDto } from "../admin/dto/admin.dto";
 import { UnitOfWork } from "../common/unit-of-work";
-import { BranchAdminValidator } from "../common/validators/branch-admin.validator";
 import { CreateSlotDto } from "./dtos/create-slot.dto";
 import { SlotDto } from "./dtos/slot.dto";
 import { UpdateSlotDto } from "./dtos/update-slot.dto";
@@ -19,6 +20,7 @@ export class SlotsService {
         private readonly slotRepository: SlotsRepository,
         private readonly monthDayRepository: MonthDayRepository,
         private readonly unitOfWork: UnitOfWork,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     GetSlotByIdAsync(slot: Slot) {
@@ -35,34 +37,28 @@ export class SlotsService {
 
         SlotValidator.ValidateLimit(dto.limit);
 
-        const neighborSlots = await this.slotRepository.find({
-            monthDay: { id: slot.monthDay.id },
-        });
+        const { startTime, endTime } = dto;
 
-        if (dto.startTime && dto.endTime) {
-            SlotValidator.ValidateTimeFormatAndOrder(dto.startTime, dto.endTime);
-            SlotValidator.ValidateNoOverlap({
-                startTime: dto.startTime,
-                endTime: dto.endTime,
-                neighborSlots: neighborSlots,
-                currentSlotId: slot.id,
+        if (startTime && endTime) {
+            const neighborSlots = await this.slotRepository.find({
+                monthDay: { id: slot.monthDay.id },
             });
-
-            const baseDate = slot.monthDay.ConvertToMoment();
-            if (!baseDate.isValid()) {
-                throw new BadRequestException("Invalid monthDay date for slot");
-            }
-
-            slot.startTime = this.ConvertToFullDate(baseDate, dto.startTime);
-            slot.endTime = this.ConvertToFullDate(baseDate, dto.endTime);
+            const { validatedStartTime, validatedEndTime } = this.ValidateAndGetSlotTimes(
+                startTime,
+                endTime,
+                neighborSlots,
+                slot.id,
+                slot.monthDay.ConvertToMoment(),
+            );
+            slot.startTime = validatedStartTime;
+            slot.endTime = validatedEndTime;
         } else if (dto.startTime || dto.endTime) {
             throw new BadRequestException(
                 "Both startTime and endTime are required to change slot time",
             );
         }
 
-        if (dto.limit !== undefined) slot.limit = dto.limit;
-        if (dto.isActive !== undefined) slot.isActive = dto.isActive;
+        slot.ApplyScalarUpdates(dto);
 
         await this.unitOfWork.Commit({ invalidateKeys: SlotKey(slot.id) });
         return SlotDto.Map(slot);
@@ -78,27 +74,18 @@ export class SlotsService {
 
         if (monthDay === null) throw new NotFoundException("Month day not found");
 
-        BranchAdminValidator.EnsureIsAssignedToBranch(admin, monthDay.branch);
+        const adminAbility = this.abilityFactory.defineAbilityForAdmin(admin);
+        ForbiddenError.from(adminAbility).throwUnlessCan(Action.Manage, monthDay.branch);
 
         SlotValidator.ValidateLimit(dto.limit);
 
-        const slots = monthDay.slots;
-
-        SlotValidator.ValidateTimeFormatAndOrder(dto.startTime, dto.endTime);
-        SlotValidator.ValidateNoOverlap({
-            startTime: dto.startTime,
-            endTime: dto.endTime,
-            neighborSlots: [...slots],
-            currentSlotId: "",
-        });
-
-        const baseDate = monthDay.ConvertToMoment();
-        if (!baseDate.isValid()) {
-            throw new BadRequestException("Invalid monthDay date for slot");
-        }
-
-        const validatedStartTime = this.ConvertToFullDate(baseDate, dto.startTime);
-        const validatedEndTime = this.ConvertToFullDate(baseDate, dto.endTime);
+        const { validatedStartTime, validatedEndTime } = this.ValidateAndGetSlotTimes(
+            dto.startTime,
+            dto.endTime,
+            [...monthDay.slots],
+            "",
+            monthDay.ConvertToMoment(),
+        );
 
         const newSlot = Slot.Create(dto, validatedStartTime, validatedEndTime);
         newSlot.monthDay = monthDay;
@@ -125,5 +112,30 @@ export class SlotsService {
                 date: baseDate.date(),
             })
             .toDate();
+    }
+
+    private ValidateAndGetSlotTimes(
+        startTime: string,
+        endTime: string,
+        neighborSlots: Slot[],
+        currentSlotId: string,
+        baseDate: moment.Moment,
+    ) {
+        SlotValidator.ValidateTimeFormatAndOrder(startTime, endTime);
+        SlotValidator.ValidateNoOverlap({
+            startTime: startTime,
+            endTime: endTime,
+            neighborSlots: [...neighborSlots],
+            currentSlotId: currentSlotId,
+        });
+
+        if (!baseDate.isValid()) {
+            throw new BadRequestException("Invalid monthDay date for slot");
+        }
+
+        return {
+            validatedStartTime: this.ConvertToFullDate(baseDate, startTime),
+            validatedEndTime: this.ConvertToFullDate(baseDate, endTime),
+        };
     }
 }
