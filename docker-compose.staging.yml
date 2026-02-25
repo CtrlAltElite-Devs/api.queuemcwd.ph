@@ -4,6 +4,7 @@ services:
     mysql:
         image: mysql:8.1
         container_name: mcwd-mysql-staging
+        restart: unless-stopped
         env_file:
             - .env
         environment:
@@ -19,6 +20,7 @@ services:
     redis:
         image: redis:7
         container_name: mcwd-redis-staging
+        restart: unless-stopped
         command: ["redis-server", "--appendonly", "yes"]
         volumes:
             - redis_data-staging:/data
@@ -31,6 +33,7 @@ services:
             context: .
             dockerfile: Dockerfile
         image: queuemcwd-api:staging
+        restart: unless-stopped
         ports:
             - "5001:5001"
         env_file:
@@ -42,7 +45,6 @@ services:
             - redis
         networks:
             - mcwd-staging-network
-
         entrypoint: ["/usr/src/app/start.sh"]
 
 volumes:
