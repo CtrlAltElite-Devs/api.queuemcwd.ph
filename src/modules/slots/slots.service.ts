@@ -91,7 +91,7 @@ export class SlotsService {
         newSlot.monthDay = monthDay;
         newSlot.branch = monthDay.branch;
         this.slotRepository.create(newSlot);
-        await this.unitOfWork.Commit();
+        await this.unitOfWork.Commit({ invalidateKeys: SlotKey(newSlot.id) });
 
         return SlotDto.Map(newSlot);
     }
