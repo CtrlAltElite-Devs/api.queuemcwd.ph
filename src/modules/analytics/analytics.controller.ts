@@ -27,7 +27,12 @@ export class AnalyticsController {
 
     @Get("status-breakdown")
     async getStatusBreakdownAnalytics(@Query() params: AnalyticsStatusBreakdownParams) {
-        return await this.analyticsService.getTimelineAnalytics(params);
+        return await this.analyticsService.getStatusBreakdownAnalytics(params);
+    }
+
+    @Get("appointment-type-breakdown")
+    async getAppointmentTypeBreakdownAnalytics(@Query() params: AnalyticsStatusBreakdownParams) {
+        return await this.analyticsService.getAppointmentTypeBreakdownAnalytics(params);
     }
 
     @Get("peak-hours")

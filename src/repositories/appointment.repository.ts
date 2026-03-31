@@ -26,6 +26,7 @@ type MutliSeriesDataDto = {
 
 type TimelineRow = { date: string; count: number };
 type StatusBreakdownRow = { status: string; count: number };
+type AppointmentTypeBreakdownRow = { appointmentType: number; count: number };
 type HourCount = { hour: string; count: number };
 type TopUserRow = { accountCode: string; count: number };
 type RepeatUserRow = { accountCode: string; count: number };
@@ -223,6 +224,26 @@ export class AppointmentRepository extends EntityRepository<Appointment> {
         return rows.map((r) => ({ status: r.status as string, count: Number(r.count) }));
     }
 
+    // 3b) Appointment type breakdown (counts per appointment type)
+    async getAppointmentTypeBreakdown(params?: {
+        branchId?: number | string;
+        from?: string;
+        to?: string;
+    }): Promise<AppointmentTypeBreakdownRow[]> {
+        const { where, values } = this.buildFilterConditions(params ?? {});
+        const sql = `
+            SELECT a.appointment_type AS appointmentType, COUNT(*) AS count
+            FROM appointment a
+            ${where}
+            GROUP BY a.appointment_type
+        `;
+        const rows = await this.em.getConnection().execute(sql, values);
+        return rows.map((r) => ({
+            appointmentType: Number(r.appointmentType),
+            count: Number(r.count),
+        }));
+    }
+
     // 4) Peak hours (hour of day)
     // join with slot if your appointment datetime is stored in slot.start_time / end_time
     async getPeakHours(params?: {
@@ -414,9 +435,12 @@ export class AppointmentRepository extends EntityRepository<Appointment> {
     }
 
     async GetAppointmentsForAdmin(branchId: string, params: AppointmentResourceParameter) {
-        return this.find(
+        const limit = params.limit ?? 10;
+        const offset = ((params.page ?? 1) - 1) * limit;
+
+        return this.findAndCount(
             { branch: branchId, ...params.GetFilters() },
-            { populate: ["slot", "branch"] },
+            { populate: ["slot", "branch"], limit, offset },
         );
     }
 }
