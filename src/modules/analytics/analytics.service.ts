@@ -39,6 +39,14 @@ export class AnalyticsService {
         });
     }
 
+    async getAppointmentTypeBreakdownAnalytics(params: AnalyticsStatusBreakdownParams) {
+        return await this.appointmentRepository.getAppointmentTypeBreakdown({
+            branchId: params.branchId,
+            from: params.from,
+            to: params.to,
+        });
+    }
+
     async GetPeakHoursAnalytics(params: AnalyticsPeakHoursParams) {
         return await this.appointmentRepository.getPeakHours({
             branchId: params.branchId,
