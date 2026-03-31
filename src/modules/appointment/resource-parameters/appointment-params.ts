@@ -1,6 +1,6 @@
 import { QBFilterQuery } from "@mikro-orm/core";
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsOptional, IsDate } from "class-validator";
+import { IsEnum, IsOptional, IsDate, IsInt, Min, Max } from "class-validator";
 import { Type } from "class-transformer";
 import { Appointment } from "src/entities/appointment.entity";
 import { AppointmentType } from "src/enums/appointment-type.enum";
@@ -22,6 +22,21 @@ export class AppointmentResourceParameter {
     @IsOptional()
     @IsEnum(AppointmentType)
     appointmentType?: AppointmentType;
+
+    @ApiPropertyOptional({ example: 1, default: 1 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    page?: number = 1;
+
+    @ApiPropertyOptional({ example: 10, default: 10 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(50)
+    limit?: number = 10;
 
     GetFilters(): QBFilterQuery<Appointment> {
         const filters: QBFilterQuery<Appointment> = {};
