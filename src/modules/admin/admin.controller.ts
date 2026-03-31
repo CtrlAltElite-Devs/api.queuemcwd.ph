@@ -8,6 +8,7 @@ import { AdminService } from "./admin.service";
 import { AdminDto } from "./dto/admin.dto";
 import { CreateAdminDto } from "./dto/create-admin.dto";
 import { AdminLoginDto } from "./dto/login-admin.dto";
+import { RefreshTokenDto } from "./dto/refresh-token.dto";
 
 @Controller("admin")
 export class AdminController {
@@ -22,6 +23,17 @@ export class AdminController {
     @Post("login")
     async AdminLoginAsync(@Body() body: AdminLoginDto) {
         return await this.adminService.AdminLoginAsync(body);
+    }
+
+    @Post("refresh")
+    async RefreshToken(@Body() body: RefreshTokenDto) {
+        return await this.adminService.RefreshTokenAsync(body);
+    }
+
+    @Post("logout")
+    @UseAdminOnlyGuard()
+    async Logout(@CurrentAdmin() admin: AdminDto) {
+        await this.adminService.LogoutAsync(admin.id);
     }
 
     @Get("me")

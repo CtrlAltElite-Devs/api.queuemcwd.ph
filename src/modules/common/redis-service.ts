@@ -5,6 +5,20 @@ import type { RedisClientType } from "redis";
 export class RedisService implements OnModuleDestroy {
     constructor(private readonly client: RedisClientType) {}
 
+    async Set(key: string, value: string, ttlSeconds: number): Promise<void> {
+        await this.client.set(key, value, { EX: ttlSeconds });
+    }
+
+    async Get(key: string): Promise<string | null> {
+        return this.client.get(key);
+    }
+
+    async Del(key: string | string[]): Promise<number> {
+        const keys = Array.isArray(key) ? key : [key];
+        if (keys.length === 0) return 0;
+        return this.client.del(keys);
+    }
+
     async invalidateByPattern(pattern: string): Promise<number> {
         const keys = await this.client.keys(pattern);
         if (keys.length === 0) {

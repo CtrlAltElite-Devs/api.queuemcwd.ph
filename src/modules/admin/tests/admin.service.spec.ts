@@ -133,6 +133,7 @@ describe("AdminService", () => {
             adminRepo.findOne.mockResolvedValueOnce(admin);
             jwtService.CreateSignedTokens.mockResolvedValueOnce({
                 accessToken: "token",
+                refreshToken: "refresh-token",
             });
 
             const dto = new AdminLoginDto();

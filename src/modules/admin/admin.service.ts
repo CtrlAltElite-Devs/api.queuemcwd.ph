@@ -19,6 +19,7 @@ import { AdminLoginResponseDto } from "./dto/admin-login-response.dto";
 import { AdminDto } from "./dto/admin.dto";
 import { CreateAdminDto } from "./dto/create-admin.dto";
 import { AdminLoginDto } from "./dto/login-admin.dto";
+import { RefreshTokenDto } from "./dto/refresh-token.dto";
 
 @Injectable()
 export class AdminService {
@@ -87,7 +88,20 @@ export class AdminService {
         );
         return {
             accessToken: signedTokens.accessToken,
+            refreshToken: signedTokens.refreshToken,
         };
+    }
+
+    async RefreshTokenAsync(dto: RefreshTokenDto): Promise<AdminLoginResponseDto> {
+        const tokens = await this.jwtService.RotateRefreshToken(dto.refreshToken);
+        return {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+        };
+    }
+
+    async LogoutAsync(adminId: string): Promise<void> {
+        await this.jwtService.InvalidateRefreshTokensForAdmin(adminId);
     }
 
     async GetAdminByIdForGuard(adminId: string) {
