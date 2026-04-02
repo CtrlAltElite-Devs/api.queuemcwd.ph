@@ -26,7 +26,7 @@ describe("ExportService", () => {
             .useMocker((token) => {
                 if (token === AppointmentRepository) {
                     return {
-                        GetAppointmentsForAdmin: jest.fn().mockResolvedValue([
+                        GetAppointmentsForExport: jest.fn().mockResolvedValue([
                             {
                                 id: "appointment-id",
                                 appointmentCode: "REF-001",
@@ -96,7 +96,13 @@ describe("ExportService", () => {
                 ],
             }),
         );
-        expect(appointmentRepository.GetAppointmentsForAdmin.mock.calls).toHaveLength(1);
+        expect(appointmentRepository.GetAppointmentsForExport.mock.calls).toHaveLength(1);
+        expect(appointmentRepository.GetAppointmentsForExport.mock.calls[0]?.[1]).toEqual(
+            {
+                from: "2026-04-01",
+                to: "2026-04-02",
+            },
+        );
         expect(result.filename).toBe("reports-main-office-2026-04-01-2026-04-02.pdf");
         expect(result.buffer).toEqual(Buffer.from("reports"));
     });

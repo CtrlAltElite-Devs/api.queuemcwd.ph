@@ -1,9 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Branch } from "src/entities/branch.entity";
 import { AppointmentType } from "src/enums/appointment-type.enum";
-import { AppointmentDto } from "../appointment/dtos/appointment.dto";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
-import { AppointmentResourceParameter } from "../appointment/resource-parameters/appointment-params";
+import { AppointmentDto } from "../appointment/dtos/appointment.dto";
 import { APPOINTMENT_TYPE_LABELS } from "./constants/export.constants";
 import { ReportsExportQueryDto } from "./dto/reports-export-query.dto";
 import { ReportsPdfPayload } from "./export.types";
@@ -18,9 +17,12 @@ export class ExportService {
     ) {}
 
     async exportReportsPdf(branch: Branch, params: ReportsExportQueryDto) {
-        const appointments = await this.appointmentRepository.GetAppointmentsForAdmin(
+        const appointments = await this.appointmentRepository.GetAppointmentsForExport(
             branch.id,
-            this.buildFilterParams(params),
+            {
+                from: params.from,
+                to: params.to,
+            },
         );
         const appointmentRows = appointments.map((appointment) => AppointmentDto.Map(appointment));
 
@@ -35,13 +37,6 @@ export class ExportService {
         const buffer = await this.pdfExportService.renderReportsPdf(payload);
 
         return { buffer, filename };
-    }
-
-    private buildFilterParams(params: ReportsExportQueryDto) {
-        const filterParams = new AppointmentResourceParameter();
-        filterParams.from = params.from ? new Date(`${params.from}T00:00:00`) : undefined;
-        filterParams.to = params.to ? new Date(`${params.to}T23:59:59.999`) : undefined;
-        return filterParams;
     }
 
     private buildMetadata(branch: Branch, params: ReportsExportQueryDto) {
@@ -80,8 +75,9 @@ export class ExportService {
         const counts = appointments.reduce(
             (appointmentCounts, appointment) =>
                 appointmentCounts.set(
-                    appointment.appointmentType,
-                    (appointmentCounts.get(appointment.appointmentType) ?? 0) + 1,
+                    Number(appointment.appointmentType) as AppointmentType,
+                    (appointmentCounts.get(Number(appointment.appointmentType) as AppointmentType) ??
+                        0) + 1,
                 ),
             new Map<AppointmentType, number>(),
         );

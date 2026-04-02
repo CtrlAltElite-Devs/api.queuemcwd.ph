@@ -3,8 +3,12 @@ import path from "node:path";
 import { Injectable } from "@nestjs/common";
 import PDFDocument from "pdfkit";
 import {
+    PDF_COLORS,
+    PDF_COPY,
+    PDF_LAYOUT,
     REPORT_DETAIL_COLUMN_WEIGHTS,
     REPORT_DETAIL_HEADERS,
+    REPORT_SUMMARY_COLUMN_WEIGHTS,
     REPORT_SUMMARY_HEADERS,
 } from "./constants/export.constants";
 import { ReportDetailRow, ReportSummaryRow, ReportsPdfPayload } from "./export.types";
@@ -22,18 +26,18 @@ export class PdfExportService {
 
         this.renderDocumentHeader(document);
         this.renderMetadata(document, payload.metadata);
-        this.renderSectionTitle(document, "Summary");
+        this.renderSectionTitle(document, PDF_COPY.summarySectionTitle);
         this.renderTable(document, {
             headers: [...REPORT_SUMMARY_HEADERS],
             rows: this.mapSummaryRows(payload.summary),
-            columnWidths: this.scaleColumnWeights(document, [2.2, 1]),
+            columnWidths: this.scaleColumnWeights(document, REPORT_SUMMARY_COLUMN_WEIGHTS),
         });
         this.renderSummaryTotal(document, payload.totalCount);
         document.moveDown();
 
-        this.renderSectionTitle(document, "Detailed Records");
+        this.renderSectionTitle(document, PDF_COPY.detailSectionTitle);
         if (payload.rows.length === 0) {
-            this.renderBodyText(document, "No report data found for the selected filters.");
+            this.renderBodyText(document, PDF_COPY.emptyDetailMessage);
         } else {
             this.renderTable(document, {
                 headers: [...REPORT_DETAIL_HEADERS],
@@ -49,7 +53,7 @@ export class PdfExportService {
 
     private createDocument(layout: "portrait" | "landscape" = "portrait") {
         return new PDFDocument({
-            margin: 50,
+            margin: PDF_LAYOUT.pageMargin,
             size: "A4",
             layout,
         });
@@ -65,12 +69,12 @@ export class PdfExportService {
     }
 
     private renderDocumentHeader(document: PDFKit.PDFDocument) {
-        this.ensurePageSpace(document, 82);
+        this.ensurePageSpace(document, PDF_LAYOUT.header.minHeight);
         this.resetCursorX(document);
         const startX = document.page.margins.left;
         const startY = document.y;
-        const logoSize = 42;
-        const gap = 12;
+        const logoSize = PDF_LAYOUT.header.logoSize;
+        const gap = PDF_LAYOUT.header.logoGap;
         const textX = startX + logoSize + gap;
         const logoPath = this.resolveLogoPath();
 
@@ -81,23 +85,26 @@ export class PdfExportService {
         }
 
         document
-            .fillColor("#111827")
+            .fillColor(PDF_COLORS.textPrimary)
             .font("Helvetica-Bold")
-            .fontSize(18)
-            .text("Metropolitan Cebu Water District", textX, startY + 10, {
+            .fontSize(PDF_LAYOUT.header.titleFontSize)
+            .text(PDF_COPY.organizationName, textX, startY + PDF_LAYOUT.header.titleOffsetY, {
                 width: document.page.width - document.page.margins.right - textX,
             });
 
         const contentBottom = Math.max(document.y, startY + logoSize);
         document
-            .moveTo(startX, contentBottom + 10)
-            .lineTo(document.page.width - document.page.margins.right, contentBottom + 10)
-            .strokeColor("#D1D5DB")
+            .moveTo(startX, contentBottom + PDF_LAYOUT.header.dividerOffsetY)
+            .lineTo(
+                document.page.width - document.page.margins.right,
+                contentBottom + PDF_LAYOUT.header.dividerOffsetY,
+            )
+            .strokeColor(PDF_COLORS.border)
             .lineWidth(1)
             .stroke();
 
-        document.fillColor("#111827").strokeColor("#000000");
-        document.y = contentBottom + 18;
+        document.fillColor(PDF_COLORS.textPrimary).strokeColor("#000000");
+        document.y = contentBottom + PDF_LAYOUT.header.bottomSpacing;
     }
 
     private resolveLogoPath() {
@@ -112,7 +119,11 @@ export class PdfExportService {
 
     private renderBodyText(document: PDFKit.PDFDocument, text: string) {
         this.resetCursorX(document);
-        document.fillColor("#374151").font("Helvetica").fontSize(10).text(text);
+        document
+            .fillColor(PDF_COLORS.textSecondary)
+            .font("Helvetica")
+            .fontSize(PDF_LAYOUT.body.fontSize)
+            .text(text);
     }
 
     private mapSummaryRows(rows: ReportSummaryRow[]) {
@@ -137,17 +148,17 @@ export class PdfExportService {
     private renderSectionTotal(document: PDFKit.PDFDocument, totalCount: number) {
         this.resetCursorX(document);
         const rightEdge = document.page.width - document.page.margins.right;
-        const width = 180;
+        const width = PDF_LAYOUT.body.totalWidth;
 
         document
-            .fillColor("#111827")
+            .fillColor(PDF_COLORS.textPrimary)
             .font("Helvetica-Bold")
-            .fontSize(10)
+            .fontSize(PDF_LAYOUT.body.totalFontSize)
             .text(`Total: ${totalCount}`, rightEdge - width, document.y, {
                 width,
                 align: "right",
             });
-        document.moveDown(0.6);
+        document.moveDown(PDF_LAYOUT.body.totalSpacingAfter);
     }
 
     private renderMetadata(
@@ -161,16 +172,16 @@ export class PdfExportService {
         this.renderMetadataRow(document, "Branch", metadata.branchName);
         this.renderMetadataRow(document, "Date Range", metadata.dateRangeLabel);
         this.renderMetadataRow(document, "Generated At", metadata.generatedAt);
-        document.moveDown(0.4);
+        document.moveDown(PDF_LAYOUT.body.metadataSpacingAfter);
     }
 
     private renderMetadataRow(document: PDFKit.PDFDocument, label: string, value: string | number) {
-        this.ensurePageSpace(document, 18);
+        this.ensurePageSpace(document, PDF_LAYOUT.body.metadataRowHeight);
         this.resetCursorX(document);
         document
-            .fillColor("#111827")
+            .fillColor(PDF_COLORS.textPrimary)
             .font("Helvetica-Bold")
-            .fontSize(9)
+            .fontSize(PDF_LAYOUT.body.metadataFontSize)
             .text(`${label}: `, document.page.margins.left, document.y, {
                 continued: true,
             })
@@ -178,16 +189,20 @@ export class PdfExportService {
             .text(String(value), {
                 lineBreak: false,
             });
-        document.fillColor("#111827");
-        document.moveDown(0.15);
+        document.fillColor(PDF_COLORS.textPrimary);
+        document.moveDown(PDF_LAYOUT.body.metadataRowSpacing);
     }
 
     private renderSectionTitle(document: PDFKit.PDFDocument, title: string) {
-        this.ensurePageSpace(document, 32);
+        this.ensurePageSpace(document, PDF_LAYOUT.section.titleMinHeight);
         this.resetCursorX(document);
-        document.moveDown(0.5);
-        document.fillColor("#111827").font("Helvetica-Bold").fontSize(14).text(title);
-        document.moveDown(0.4);
+        document.moveDown(PDF_LAYOUT.section.titleSpacingBefore);
+        document
+            .fillColor(PDF_COLORS.textPrimary)
+            .font("Helvetica-Bold")
+            .fontSize(PDF_LAYOUT.section.titleFontSize)
+            .text(title);
+        document.moveDown(PDF_LAYOUT.section.titleSpacingAfter);
     }
 
     private renderTable(document: PDFKit.PDFDocument, table: TableDefinition) {
@@ -196,7 +211,7 @@ export class PdfExportService {
             document.page.width - document.page.margins.left - document.page.margins.right;
         const widths =
             table.columnWidths ?? this.buildEvenColumnWidths(table.headers.length, availableWidth);
-        const rowHeight = 18;
+        const rowHeight = PDF_LAYOUT.table.rowHeight;
 
         this.drawTableRow(document, table.headers, widths, rowHeight, true);
         for (const row of table.rows) {
@@ -212,7 +227,7 @@ export class PdfExportService {
         rowHeight: number,
         isHeader: boolean,
     ) {
-        this.ensurePageSpace(document, rowHeight + 6);
+        this.ensurePageSpace(document, rowHeight + PDF_LAYOUT.table.minRowSpacing);
         const startX = document.page.margins.left;
         const startY = document.y;
         let currentX = startX;
@@ -220,22 +235,33 @@ export class PdfExportService {
         row.forEach((value, index) => {
             const width = widths[index];
             if (isHeader) {
-                document.rect(currentX, startY, width, rowHeight).fill("#E5E7EB");
-                document.fillColor("#111827").font("Helvetica-Bold").fontSize(9);
+                document.rect(currentX, startY, width, rowHeight).fill(PDF_COLORS.headerFill);
+                document
+                    .fillColor(PDF_COLORS.textPrimary)
+                    .font("Helvetica-Bold")
+                    .fontSize(PDF_LAYOUT.table.headerFontSize);
             } else {
-                document.rect(currentX, startY, width, rowHeight).stroke("#D1D5DB");
-                document.fillColor("#111827").font("Helvetica").fontSize(8);
+                document.rect(currentX, startY, width, rowHeight).stroke(PDF_COLORS.border);
+                document
+                    .fillColor(PDF_COLORS.textPrimary)
+                    .font("Helvetica")
+                    .fontSize(PDF_LAYOUT.table.fontSize);
             }
 
-            document.text(String(value), currentX + 4, startY + 5, {
-                width: width - 8,
-                ellipsis: true,
-            });
+            document.text(
+                String(value),
+                currentX + PDF_LAYOUT.table.rowPaddingX,
+                startY + PDF_LAYOUT.table.rowPaddingY,
+                {
+                    width: width - PDF_LAYOUT.table.rowPaddingX * 2,
+                    ellipsis: true,
+                },
+            );
             currentX += width;
         });
 
         document.y = startY + rowHeight;
-        document.fillColor("#111827");
+        document.fillColor(PDF_COLORS.textPrimary);
     }
 
     private scaleColumnWeights(document: PDFKit.PDFDocument, weights: readonly number[]) {
