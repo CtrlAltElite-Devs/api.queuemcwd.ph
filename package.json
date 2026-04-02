@@ -7,7 +7,7 @@
     "license": "UNLICENSED",
     "scripts": {
         "prepare": "husky",
-        "build": "nest build",
+        "build": "nest build && mkdir -p dist/src/assets && cp -R src/assets/. dist/src/assets/",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start",
         "start:dev": "nest start --watch",
