@@ -20,7 +20,6 @@ import { CacheService } from "../common/cache-service";
 import { AppointmentRepository } from "src/repositories/appointment.repository";
 import { AppointmentResourceParameter } from "../appointment/resource-parameters/appointment-params";
 import { AppointmentDto } from "../appointment/dtos/appointment.dto";
-import { PaginatedResult } from "src/utils/paginated-result";
 
 @Injectable()
 export class BranchService {
@@ -207,15 +206,13 @@ export class BranchService {
     }
 
     async GetAppointmentsForBranch(branch: Branch, params: AppointmentResourceParameter) {
-        const [results, total] = await this.appointmentRepository.GetAppointmentsForAdmin(
+        const results = await this.appointmentRepository.GetAppointmentsForAdminPaginated(
             branch.id,
             params,
         );
-        return PaginatedResult.create(
-            results.map((a) => AppointmentDto.Map(a)),
-            total,
-            params.page ?? 1,
-            params.limit ?? 10,
-        );
+        return {
+            data: results.data.map((appointment) => AppointmentDto.Map(appointment)),
+            meta: results.meta,
+        };
     }
 }
