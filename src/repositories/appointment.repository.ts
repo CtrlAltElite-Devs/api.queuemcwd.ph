@@ -33,8 +33,28 @@ type RepeatUserRow = { accountCode: string; count: number };
 type AvgLeadTimeRow = { avgLeadTimeMinutes: number }; // minutes
 type AvgDurationRow = { avgDurationMinutes: number }; // minutes
 type StatusTrendRow = { date: string; status: string; count: number };
+type ExportAppointmentsParams = {
+    from?: string;
+    to?: string;
+};
+type PaginatedAppointmentsResult = {
+    data: Appointment[];
+    meta: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+};
 
 export class AppointmentRepository extends EntityRepository<Appointment> {
+    private buildAdminFindOptions() {
+        return {
+            populate: ["slot", "branch"] as const,
+            orderBy: { dateValidity: "DESC" as const },
+        };
+    }
+
     async GenerateUniqueAppointmentCodeAsync(): Promise<string> {
         for (let i = 0; i < 10; i++) {
             const code = generateAppointmentCode();
@@ -224,7 +244,6 @@ export class AppointmentRepository extends EntityRepository<Appointment> {
         return rows.map((r) => ({ status: r.status as string, count: Number(r.count) }));
     }
 
-    // 3b) Appointment type breakdown (counts per appointment type)
     async getAppointmentTypeBreakdown(params?: {
         branchId?: number | string;
         from?: string;
@@ -236,6 +255,7 @@ export class AppointmentRepository extends EntityRepository<Appointment> {
             FROM appointment a
             ${where}
             GROUP BY a.appointment_type
+            ORDER BY a.appointment_type ASC
         `;
         const rows = await this.em.getConnection().execute(sql, values);
         return rows.map((r) => ({
@@ -435,12 +455,55 @@ export class AppointmentRepository extends EntityRepository<Appointment> {
     }
 
     async GetAppointmentsForAdmin(branchId: string, params: AppointmentResourceParameter) {
-        const limit = params.limit ?? 10;
-        const offset = ((params.page ?? 1) - 1) * limit;
+        return this.find({ branch: branchId, ...params.GetFilters() }, this.buildAdminFindOptions());
+    }
 
-        return this.findAndCount(
-            { branch: branchId, ...params.GetFilters() },
-            { populate: ["slot", "branch"], limit, offset },
+    async GetAppointmentsForExport(branchId: string, params: ExportAppointmentsParams) {
+        const { where, values } = this.buildFilterConditions({
+            branchId,
+            from: params.from,
+            to: params.to,
+        });
+        const sql = `
+            SELECT a.id
+            FROM appointment a
+            ${where}
+            ORDER BY a.date_validity DESC
+        `;
+        const rows = await this.em.getConnection().execute<{ id: string }[]>(sql, values);
+
+        if (rows.length === 0) {
+            return [];
+        }
+
+        return this.find(
+            { id: { $in: rows.map((row) => row.id) } },
+            this.buildAdminFindOptions(),
         );
+    }
+
+    async GetAppointmentsForAdminPaginated(
+        branchId: string,
+        params: AppointmentResourceParameter,
+    ): Promise<PaginatedAppointmentsResult> {
+        const { page, limit, offset } = params.GetPagination();
+        const [data, total] = await this.findAndCount(
+            { branch: branchId, ...params.GetFilters() },
+            {
+                ...this.buildAdminFindOptions(),
+                limit,
+                offset,
+            },
+        );
+
+        return {
+            data,
+            meta: {
+                page,
+                limit,
+                total,
+                totalPages: total === 0 ? 1 : Math.ceil(total / limit),
+            },
+        };
     }
 }

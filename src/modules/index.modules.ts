@@ -14,6 +14,7 @@ import { AppointmentModule } from "./appointment/appointment.module";
 import { BranchModule } from "./branch/branch.module";
 import { CommonModule } from "./common/common.module";
 import { RedisClientModule } from "./common/redis-module";
+import { ExportModule } from "./export/export.module";
 import { MonthDayModule } from "./month-day/month-day.module";
 import { SlotModule } from "./slots/slots.module";
 
@@ -25,6 +26,7 @@ export const ApplicationModules = [
     MonthDayModule,
     SlotModule,
     AnalyticsModule,
+    ExportModule,
 ];
 
 export const InfrastructureModules = [
