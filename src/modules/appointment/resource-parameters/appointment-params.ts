@@ -54,4 +54,12 @@ export class AppointmentResourceParameter {
 
         return filters;
     }
+
+    GetPagination() {
+        return {
+            page: this.page ?? 1,
+            limit: this.limit ?? 10,
+            offset: ((this.page ?? 1) - 1) * (this.limit ?? 10),
+        };
+    }
 }
